@@ -4,13 +4,15 @@ def main():
 
 import socket
 
-    HOST = "31.204.152.209"  # The server's hostname or IP address
-    PORT = 6667  # The port used by the server
+class baseCall():
+    def __init__(self):
+        self.HOST = "31.204.152.209"  # The server's hostname or IP address
+        self.PORT = 6667  # The port used by the server
 
-with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-    s.connect((HOST, PORT))
-    s.sendall(b"CAP LS\r\n")
-    data = s.recv(1024)
-
-print(f"Received {data!r}")
+    def callsocket(self):
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+            s.connect((self.HOST, self.PORT))
+            s.sendall(b"CAP LS\r\n")
+            data = s.recv(1024)
+        print(f"Received {data!r}")
 
