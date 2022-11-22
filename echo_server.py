@@ -5,6 +5,7 @@ import socket
 import selectors
 import types
 
+conn_list = []
 #example code taken from RealPython socket tutorial
 def accept_wrapper(sock):
     conn, addr = sock.accept()  # Should be ready to read
@@ -13,6 +14,7 @@ def accept_wrapper(sock):
     data = types.SimpleNamespace(addr=addr, inb=b"", outb=b"")
     events = selectors.EVENT_READ | selectors.EVENT_WRITE
     sel.register(conn, events, data=data)
+    conn_list.append((conn, addr))
 
 def service_connection(key, mask):
     sock = key.fileobj
@@ -28,7 +30,9 @@ def service_connection(key, mask):
     if mask & selectors.EVENT_WRITE:
         if data.outb:
             print(f"Echoing {data.outb!r} to {data.addr}")
-            sent = sock.send(data.outb)  # Should be ready to write
+            #for con in conn_list:
+            #    sent = con[0].send(data.outb)  # Should be ready to write
+            sent = sock.send(data.outb)
             data.outb = data.outb[sent:]
 
 sel = selectors.DefaultSelector()
@@ -39,6 +43,8 @@ lsock.bind((host, port))
 lsock.listen()
 print(f"Listening on {(host, port)}")
 lsock.setblocking(False)
+lsock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+
 sel.register(lsock, selectors.EVENT_READ, data=None)
 
 try:
