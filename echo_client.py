@@ -1,19 +1,22 @@
-print("hello world")
-
 import socket
 from time import sleep
 
-class baseCall():
-    def __init__(self):
-        self.HOST = "31.204.152.209"  # The server's hostname or IP address
-        self.PORT = 6667  # The port used by the server
+HOST = "192.168.0.4"  # The server's hostname or IP address
+PORT = 4001  # The port used by the server
 
-    def callsocket(self):
-        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-            s.connect((self.HOST, self.PORT))
-            s.sendall(b"CAP LS\r\n")
+with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+    quit = False
+    s.connect((HOST, PORT))
+    while not quit:
+        to_send = input()
+        if to_send == "quit":
+            quit = True;
+        else:
+
+            s.sendall(bytes("{}\r\n".format(to_send),"utf-8"))
             data = s.recv(1024)
-        print(f"Received {data!r}")
+            print(f"Received {data!r}")
+
 
 """
 Frame 165: 120 bytes on wire (960 bits), 120 bytes captured (960 bits) on interface en0, id 0
