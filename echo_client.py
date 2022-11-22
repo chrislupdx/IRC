@@ -1,21 +1,62 @@
 import socket
 from time import sleep
+import selectors
+import sys
+from threading import Thread
 
-HOST = "192.168.0.4"  # The server's hostname or IP address
-PORT = 4001  # The port used by the server
+HOST, PORT = sys.argv[1], int(sys.argv[2])
+
+G_quit = False
+QUITMSG = "quit"
+
+
+def readInput(s):
+    global G_quit
+    global QUITMSG
+    while not G_quit:
+        usrMsg = input()
+        if usrMsg==QUITMSG:
+            G_quit =True
+        else:
+            s.sendall(bytes("{}\r\n".format(usrMsg),"utf-8"))
+
+
+#sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+sel = selectors.DefaultSelector()
 
 with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-    quit = False
     s.connect((HOST, PORT))
-    while not quit:
-        to_send = input()
-        if to_send == "quit":
-            quit = True;
-        else:
+    #sel.register(s, selectors.EVENT_READ, data=None)
+    #sel.register(sys.stdin, selectors.EVENT_READ, data=None)
+    t = Thread(group=None,target=readInput, name="ReadsFromStdin",args=[s])
+    t.start()
 
-            s.sendall(bytes("{}\r\n".format(to_send),"utf-8"))
-            data = s.recv(1024)
-            print(f"Received {data!r}")
+    while not G_quit:
+        #events = sel.select(timeout=None)
+        data = s.recv(1024)
+        print(f"Received {data!r}")
+
+        #for key, mask in events:
+
+            #sock = key.fileobj
+            #data = key.data
+            #if mask & selectors.EVENT_READ:
+            #    print(key.data)
+                #recv_data = sock.recv(1024)  # Should be ready to read
+        #if to_send == "quit":
+        #    quit = True;
+        #else:
+        #    s.sendall(bytes("{}\r\n".format(to_send),"utf-8"))
+
+"""
+design idea: 
+- 2 threads, one for user input and one for reading/writing from a socket.
+- ncurses for dealing with handling gui interface (in a bit)
+
+
+"""
+
+
 
 
 """
