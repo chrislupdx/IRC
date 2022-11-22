@@ -43,6 +43,8 @@ lsock.bind((host, port))
 lsock.listen()
 print(f"Listening on {(host, port)}")
 lsock.setblocking(False)
+lsock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+
 sel.register(lsock, selectors.EVENT_READ, data=None)
 
 try:
