@@ -7,3 +7,13 @@
 
 ## Python:
 - socket programming: https://realpython.com/python-sockets/
+
+# Usage <! I don't know shit about markdown fyi>
+
+## Init: 
+- Server: In a terminal window:
+> python echo_server.py
+
+- Client: In a separate terminal window:
+> python echo_client.py
+
