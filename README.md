@@ -8,7 +8,7 @@
 ## Python:
 - socket programming: https://realpython.com/python-sockets/
 
-# Usage <! I don't know shit about markdown fyi>
+# Usage
 
 ## Init: 
 - Server: In a terminal window:
@@ -17,3 +17,6 @@
 - Client: In a separate terminal window:
 > python echo_client.py
 
+# Connecting:
+
+# 
