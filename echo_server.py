@@ -8,6 +8,8 @@ import types
 conn_list = []
 usrID = 0
 #example code taken from RealPython socket tutorial
+server = Server("Round2ElectricBoogaloo")
+
 def accept_wrapper(sock):
     global usrID
     conn, addr = sock.accept()  # Should be ready to read
