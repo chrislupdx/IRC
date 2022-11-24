@@ -7,3 +7,16 @@
 
 ## Python:
 - socket programming: https://realpython.com/python-sockets/
+
+# Usage
+
+## Init: 
+- Server: In a terminal window:
+> python echo_server.py
+
+- Client: In a separate terminal window:
+> python echo_client.py
+
+# Connecting:
+
+# 

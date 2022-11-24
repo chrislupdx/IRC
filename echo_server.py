@@ -48,7 +48,7 @@ def service_connection(key, mask):
 
 sel = selectors.DefaultSelector()
 
-host, port = sys.argv[1], int(sys.argv[2])
+host, port = sys.argv[1], int(sys.argv[2]) #this list is out of range?
 lsock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 lsock.bind((host, port))
 lsock.listen()
