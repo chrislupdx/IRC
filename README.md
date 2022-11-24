@@ -7,16 +7,23 @@
 
 ## Python:
 - socket programming: https://realpython.com/python-sockets/
+- regex: https://www.guru99.com/python-regular-expressions-complete-tutorial.html
 
 # Usage
 
 ## Init: 
 - Server: In a terminal window:
-> python echo_server.py
+> python echo_server.py HOST PORT
 
 - Client: In a separate terminal window:
-> python echo_client.py
+> python echo_client.py HOST PORT
 
 # Connecting:
 
-# 
+# Client Commands:
+CREATEROOM [roomname]
+
+
+# Todo
+- Create usernames
+- 
