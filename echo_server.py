@@ -6,19 +6,23 @@ import selectors
 import types
 
 conn_list = []
+usrID = 0
 #example code taken from RealPython socket tutorial
 def accept_wrapper(sock):
+    global usrID
     conn, addr = sock.accept()  # Should be ready to read
     print(f"Accepted connection from {addr}")
     conn.setblocking(False)
     data = types.SimpleNamespace(addr=addr, inb=b"", outb=b"")
     events = selectors.EVENT_READ | selectors.EVENT_WRITE
     sel.register(conn, events, data=data)
-    conn_list.append((conn, addr))
+    conn_list.append([(conn, addr), usrID])
+    usrID+=1
 
 def service_connection(key, mask):
     sock = key.fileobj
     data = key.data
+    global usrID
     if mask & selectors.EVENT_READ:
         recv_data = sock.recv(1024)  # Should be ready to read
         if recv_data:
@@ -30,10 +34,17 @@ def service_connection(key, mask):
     if mask & selectors.EVENT_WRITE:
         if data.outb:
             print(f"Echoing {data.outb!r} to {data.addr}")
-            #for con in conn_list:
-            #    sent = con[0].send(data.outb)  # Should be ready to write
             sent = sock.send(data.outb)
-            data.outb = data.outb[sent:]
+            print(type(sock))
+            #find what user this came from
+            messagerID = 0
+            for i in range(usrID):
+                if conn_list[i][0][0].fileno() == sock.fileno():
+                    messagerID = i
+            for i in range(usrID):
+                messagePreface = "user " + str(messagerID) + " says: "
+                conn_list[i][0][0].send(bytes("{}\r\n".format(messagePreface),"utf-8")+ data.outb)
+            data.outb = data.outb[sent:] #flush the buffer?
 
 sel = selectors.DefaultSelector()
 
