@@ -7,6 +7,16 @@ import types
 
 conn_list = []
 usrID = 0
+
+def join():
+    #client joins a server
+    pass
+
+cmd_list = {    
+    'JOIN ': join(),
+    'NICK ': 0,
+    'LEAVE ': 1
+    }
 #example code taken from RealPython socket tutorial
 server = Server("Round2ElectricBoogaloo")
 
@@ -21,10 +31,21 @@ def accept_wrapper(sock):
     conn_list.append([(conn, addr), usrID])
     usrID+=1
 
+def parseCmd(incoming_cmd):
+    print("starting parsecmd")
+    #compares incoming_cmd to cmd_list, if match returns, calls function with ongoing paramers in incoming_cmd
+    #returns false if no recognized command is issued
+    print(incoming_cmd)
+    #pull apart incoming
+    # pass
+
+def leave():
+    print("kicking you out of server")
+
 def service_connection(key, mask):
     sock = key.fileobj
     data = key.data
-    global usrID
+    global usrID #this is the second instatitaion of this globally, possibly dangerous?
     if mask & selectors.EVENT_READ:
         recv_data = sock.recv(1024)  # Should be ready to read
         if recv_data:
@@ -46,11 +67,13 @@ def service_connection(key, mask):
             for i in range(usrID):
                 messagePreface = "user " + str(messagerID) + " says: "
                 conn_list[i][0][0].send(bytes("{}\r\n".format(messagePreface),"utf-8")+ data.outb)
+            parseCmd(data.outb) #parses the user commands and executes them
             data.outb = data.outb[sent:] #flush the buffer?
 
+#if we wrap all of this below into a funciton, we still need a way to get argv fed into the wrapper function
 sel = selectors.DefaultSelector()
 
-host, port = sys.argv[1], int(sys.argv[2]) #this list is out of range?
+host, port = sys.argv[1], int(sys.argv[2])
 lsock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 lsock.bind((host, port))
 lsock.listen()
