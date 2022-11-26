@@ -2,6 +2,7 @@
 import selectors
 import socket
 import types
+import IRCparse
 
 
 class Server(object):
@@ -22,6 +23,7 @@ class Server(object):
         self.sel = None
         self.tmpListOfNames = ["Galadriel", "Elrond", "Frodo", "Gilgalad" ]
         self.tmpID = 0;
+        self.cmds = IRCparse.IRCcommands()
 
     def accept_wrapper(self,sock):
         conn, addr = sock.accept()  # Should be ready to read
@@ -35,12 +37,16 @@ class Server(object):
         self.tmpID +=1
 
     def parseCmd(self, incoming_cmd,fd):
+        parsedType, payload = IRCparse.parse(incoming_cmd)
+        if parsedType == self.cmds.DEFAULT:
+
+            return self.do_sendToAllInList(payload, fd, self.userList)
+
         print("starting parsecmd")
         #compares incoming_cmd to cmd_list, if match returns, calls function with ongoing paramers in incoming_cmd
         #returns false if no recognized command is issued
         print(incoming_cmd)
         #payload, fd, userList
-        return self.do_sendToAllInList(incoming_cmd, fd, self.userList)
         #pull apart incoming
         # pass
 
@@ -63,8 +69,12 @@ class Server(object):
             if data.outb:
                 print(type(sock))
                 #find what user this came from
-                sent = self.parseCmd(data.outb, sock.fileno())
+                sent = self.parseCmd(data.outb.decode('utf-8'), sock.fileno())
+                print(sent)
+                print(data.outb)
+                print(data.outb)
                 data.outb = data.outb[sent:] #flush the buffer?
+                print(data.outb)
 
 
     def startServer(self, host, port): 
@@ -109,8 +119,9 @@ class Server(object):
     #parsed commands here?
     def do_sendToAllInList(self,payload, fd, userList):
         sender = self.userList[fd]
-        messagePreface = sender.nick + ": "
-        messageToSend = bytes("{}".format(messagePreface),"utf-8")+ payload
+        message = sender.nick + ": " + payload
+        messageToSend = bytes("{}".format(message),"utf-8")
+        print("sending:" + messageToSend.decode("utf-8"))
         for fd in userList.keys():
             sent = userList[fd].sock.send(messageToSend)
         return sent
@@ -133,6 +144,10 @@ class Room(object):
 
     def listUsers(self):
         return [u.name for u in self.userList]
+
+    def addUser(fd):
+        if fd not in userList:
+            self.userList.append(fd)
             
 
 class User(object):
