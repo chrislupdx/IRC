@@ -3,21 +3,33 @@ from time import sleep
 import selectors
 import sys
 from threading import Thread
+from IRCparse import IRCcommands
 
 HOST, PORT = sys.argv[1], int(sys.argv[2])
 
 G_quit = False
-QUITMSG = "quit"
+cmds = IRCcommands()
 
 def readInput(s):
     global G_quit
-    global QUITMSG
+    global cmds
     while not G_quit:
         usrMsg = input()
-        if usrMsg==QUITMSG:
-            G_quit =True
+        if usrMsg[0]!="\\":
+            #they are just typing into whatever chat window they had last
+            #TODO: have the client keep track of this
+            s.sendall(bytes("{} {}\r\n".format(cmds.DEFAULT, usrMsg),"utf-8"))
         else:
-            s.sendall(bytes("{}\r\n".format(usrMsg),"utf-8"))
+            #we have a command, parse it!
+            cmd = usrMsg.split()[0]
+            if cmd == cmds.joinUSR:
+                s.sendall(bytes("JOIN {}\r\n".format(usrMsg),"utf-8"))
+            if cmd == cmds.quitUSR:
+                #send disconnect request to server.
+                G_quit =True
+                
+
+
 
 with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
     s.connect((HOST, PORT))

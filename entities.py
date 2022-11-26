@@ -2,6 +2,8 @@
 import selectors
 import socket
 import types
+import IRCparse
+
 
 class Server(object):
     def join():
@@ -17,9 +19,11 @@ class Server(object):
         self.name = name
         self.userList = {}
         self.roomList = []
-        self.conn_list = [] #temporary
-        self.usrID = 0 #temporary
+        #self.conn_list = [] #temporary
         self.sel = None
+        self.tmpListOfNames = ["Galadriel", "Elrond", "Frodo", "Gilgalad" ]
+        self.tmpID = 0;
+        self.cmds = IRCparse.IRCcommands()
 
     def accept_wrapper(self,sock):
         conn, addr = sock.accept()  # Should be ready to read
@@ -28,14 +32,21 @@ class Server(object):
         data = types.SimpleNamespace(addr=addr, inb=b"", outb=b"")
         events = selectors.EVENT_READ | selectors.EVENT_WRITE
         self.sel.register(conn, events, data=data)
-        self.conn_list.append([(conn, addr), self.usrID])
-        self.usrID+=1
+        #self.conn_list.append([(conn, addr), self.usrID])
+        self.addUser(conn, addr, self.tmpListOfNames[self.tmpID])
+        self.tmpID +=1
 
-    def parseCmd(self, incoming_cmd):
+    def parseCmd(self, incoming_cmd,fd):
+        parsedType, payload = IRCparse.parse(incoming_cmd)
+        if parsedType == self.cmds.DEFAULT:
+
+            return self.do_sendToAllInList(payload, fd, self.userList)
+
         print("starting parsecmd")
         #compares incoming_cmd to cmd_list, if match returns, calls function with ongoing paramers in incoming_cmd
         #returns false if no recognized command is issued
         print(incoming_cmd)
+        #payload, fd, userList
         #pull apart incoming
         # pass
 
@@ -56,19 +67,15 @@ class Server(object):
                 sock.close()
         if mask & selectors.EVENT_WRITE:
             if data.outb:
-                print(f"Echoing {data.outb!r} to {data.addr}")
-                sent = sock.send(data.outb)
                 print(type(sock))
                 #find what user this came from
-                messagerID = 0
-                for i in range(self.usrID):
-                    if self.conn_list[i][0][0].fileno() == sock.fileno():
-                        messagerID = i
-                for i in range(self.usrID):
-                    messagePreface = "user " + str(messagerID) + " says: "
-                    self.conn_list[i][0][0].send(bytes("{}\r\n".format(messagePreface),"utf-8")+ data.outb)
-                self.parseCmd(data.outb) #parses the user commands and executes them
+                sent = self.parseCmd(data.outb.decode('utf-8'), sock.fileno())
+                print(sent)
+                print(data.outb)
+                print(data.outb)
                 data.outb = data.outb[sent:] #flush the buffer?
+                print(data.outb)
+
 
     def startServer(self, host, port): 
         #if we wrap all of this below into a funciton, we still need a way to get argv fed into the wrapper function
@@ -103,10 +110,21 @@ class Server(object):
 
     #returns a 0 for success, -1 for fail
     #todo: can't actually add nicks.  Just do it for ease of testing.
-    def addUser(self,fd, sock, nickname = None):
-        if fd in userList:
+    def addUser(self,sock, addr,nickname = None):
+        fd = sock.fileno()
+        if fd in self.userList:
             return -1 #TODO then kick them
-        userList[fd] = User(fd, sock, nickname)
+        self.userList[fd] = User(fd, sock, addr, nickname)
+
+    #parsed commands here?
+    def do_sendToAllInList(self,payload, fd, userList):
+        sender = self.userList[fd]
+        message = sender.nick + ": " + payload
+        messageToSend = bytes("{}".format(message),"utf-8")
+        print("sending:" + messageToSend.decode("utf-8"))
+        for fd in userList.keys():
+            sent = userList[fd].sock.send(messageToSend)
+        return sent
  
 """    def listRooms(user):
         return []"""
@@ -126,14 +144,19 @@ class Room(object):
 
     def listUsers(self):
         return [u.name for u in self.userList]
+
+    def addUser(fd):
+        if fd not in userList:
+            self.userList.append(fd)
             
 
 class User(object):
     #todo: can't actually add nicks.  Just do it for testing.
-    def __init__(self, fd, usrSock, nickname = None):
+    def __init__(self, fd, usrSock, addr, nickname = None):
         self.completedHandshake = False
         self.nick = nickname
         self.fd = fd
+        self.addr = addr
         self.roomList = [] #can we get around this? idk.
         self.sock = usrSock
 
