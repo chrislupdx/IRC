@@ -18,7 +18,7 @@ def readInput(s):
         if usrMsg[0]!="\\":
             #they are just typing into whatever chat window they had last
             #TODO: have the client keep track of this
-            s.sendall(bytes("{} {}\r\n".format(cmds.DEFAULT, usrMsg),"utf-8"))
+            s.sendall(bytes("{} {}\r\n".format(cmds.LEAVE, usrMsg),"utf-8"))
         else:
             #we have a command, parse it!
             cmd = usrMsg.split()[0]
