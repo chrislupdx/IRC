@@ -31,11 +31,7 @@ class Server(object):
     def parseCmd(self, incoming_cmd, fd):
         #compares incoming_cmd to cmd_list, if match returns, calls function with ongoing parameters in incoming_cmd
         #returns false if no recognized command is issued
-        #payload, fd, userList
-        print('incoming_cmd is ', incoming_cmd)
         parsedType, payload = IRCparse.parse(incoming_cmd)
-        # print("parsedtype:", parsedType, "payload,", payload)
-        print('self.cmds is', self.cmds)
         if parsedType == self.cmds.DEFAULT:
             self.do_sendToAllInList(payload, fd, self.userList)
         if parsedType == self.cmds.JOINROOM:
@@ -110,10 +106,7 @@ class Server(object):
         sender = self.userList[fd]
         message = sender.nick + ": " + payload
         messageToSend = bytes("{}".format(message),"utf-8")
-        print("sending:" + messageToSend.decode("utf-8"))
-        print(userList)
         for fd in userList.keys():
-            print(fd)
             sent = userList[fd].sock.send(messageToSend)
         return sent
 

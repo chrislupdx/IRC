@@ -40,8 +40,6 @@ Note that all trailing and leading space information
 """
 def parse(unparsed):
 	cleaned = unparsed.strip()
-    
-	print('cleaned is', cleaned)
 	cmd = unparsed.split()[0]
 	payload = " ".join(unparsed.split()[1:]).rstrip()
 	return cmd, payload

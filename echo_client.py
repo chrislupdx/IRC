@@ -23,7 +23,7 @@ def readInput(s):
             #we have a command, parse it!
             cmd, payload = parse(usrMsg)
             if cmd == cmds.joinUSR:
-                s.sendall(bytes("{} {}\r\n".format(cmds.JOIN,payload),"utf-8"))
+                s.sendall(bytes("{} {}\r\n".format(cmds.JOINROOM,payload),"utf-8"))
             if cmd == cmds.quitUSR:
                 #send disconnect request to server.
                 G_quit =True
