@@ -15,22 +15,26 @@ def readInput(s):
     global cmds
     while not G_quit:
         usrMsg = input()
-        if usrMsg[0]!="\\":
+        if usrMsg[0]!="/":
             #they are just typing into whatever chat window they had last
             #TODO: have the client keep track of this
-            s.sendall(bytes("{} {}\r\n".format(cmds.DEFAULT, usrMsg),"utf-8"))
+            s.sendall(bytes("{} {}\r\n".format('DEFAULT', usrMsg),"utf-8"))
         else:
             #we have a command, parse it!
             cmd = usrMsg.split()[0]
+            print('cmd is:', cmd)
             if cmd == cmds.joinUSR:
                 s.sendall(bytes("JOIN {}\r\n".format(usrMsg),"utf-8"))
             if cmd == cmds.quitUSR:
                 #send disconnect request to server.
                 G_quit =True
-                
-
-
-
+            if cmd in IRCcommands.messagetypes:
+                args = None
+                splitmsg = usrMsg.split()
+                withoutfirst = splitmsg[1:]
+                if len(withoutfirst) > 1:
+                    args = withoutfirst
+                s.sendall(bytes("SERVERFUNCTION {}, body {} \r\n".format(cmd, args),"utf-8"))
 with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
     s.connect((HOST, PORT))
 

@@ -6,15 +6,7 @@ import IRCparse
 
 
 class Server(object):
-    def join():
-    #client joins a server
-        pass
 
-    cmd_list = {    
-        'JOIN ': join(),
-        'NICK ': 0,
-        'LEAVE ': 1
-        }
     def __init__(self, name):
         self.name = name
         self.userList = {}
@@ -36,22 +28,22 @@ class Server(object):
         self.addUser(conn, addr, self.tmpListOfNames[self.tmpID])
         self.tmpID +=1
 
-    def parseCmd(self, incoming_cmd,fd):
-        parsedType, payload = IRCparse.parse(incoming_cmd)
-        if parsedType == self.cmds.DEFAULT:
-
-            return self.do_sendToAllInList(payload, fd, self.userList)
-
-        print("starting parsecmd")
-        #compares incoming_cmd to cmd_list, if match returns, calls function with ongoing paramers in incoming_cmd
+    def parseCmd(self, incoming_cmd, fd):
+        #compares incoming_cmd to cmd_list, if match returns, calls function with ongoing parameters in incoming_cmd
         #returns false if no recognized command is issued
-        print(incoming_cmd)
         #payload, fd, userList
-        #pull apart incoming
-        # pass
+        print('incoming_cmd is ', incoming_cmd)
+        parsedType, payload = IRCparse.parse(incoming_cmd)
+        # print("parsedtype:", parsedType, "payload,", payload)
+        print('self.cmds is', self.cmds)
+        if parsedType == self.cmds.DEFAULT:
+            print("hit default")
+        if parsedType == self.cmds.JOINROOM:
+            print("calling joinRoom")
+            #fd.joinroom(roomname)
+            
+        return self.do_sendToAllInList(payload, fd, self.userList)
 
-    def leave():
-        print("kicking you out of server")
 
     def service_connection(self,key, mask):
         sock = key.fileobj
@@ -71,7 +63,6 @@ class Server(object):
                 #find what user this came from
                 sent = self.parseCmd(data.outb.decode('utf-8'), sock.fileno())
                 print(sent)
-                print(data.outb)
                 print(data.outb)
                 data.outb = data.outb[sent:] #flush the buffer?
                 print(data.outb)
