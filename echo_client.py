@@ -9,23 +9,29 @@ HOST, PORT = sys.argv[1], int(sys.argv[2])
 
 G_quit = False
 cmds = IRCcommands()
+curRoom = ""
 
 def readInput(s):
     global G_quit
     global cmds
+    global curRoom
     while not G_quit:
         usrMsg = input()
         if usrMsg[0]!="/":
             #they are just typing into whatever chat window they had last
             #TODO: have the client keep track of this
-            s.sendall(bytes("{} {}\r\n".format('DEFAULT', usrMsg),"utf-8"))
+            if curRoom != "":
+                s.sendall(bytes("{} {} {}\r\n".format('ROOMMSG', curRoom, usrMsg),"utf-8"))
+            else:
+                s.sendall(bytes("{} {}\r\n".format('DEFAULT', usrMsg),"utf-8"))
         else:
             #we have a command, parse it!
             cmd, payload = parse(usrMsg)
             if cmd == cmds.joinUSR:
                 s.sendall(bytes("{} {}\r\n".format(cmds.JOINROOM,payload),"utf-8"))
+                curRoom = payload.split()[0]
             if cmd == cmds.quitUSR:
-                #send disconnect request to server.
+                #TODO: send disconnect request to server.
                 G_quit =True
             if cmd in IRCcommands.messagetypes:
                 args = None

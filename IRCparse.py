@@ -8,24 +8,12 @@ class IRCcommands(object):
 
 		self.JOINROOM = "JOIN" 
 		self.LEAVE = "LEAVE"
-		self.DEFAULT = "DEFAULT" #TODO: for developing			
+		self.DEFAULT = "DEFAULT" #TODO: for developing		
+		self.MSGROOM = "ROOMMSG" #followed by roomname and then the entire message
 
 		#what the user types
 		self.joinUSR = "/join" #connects them to the server??
 		self.quitUSR = "/quit" #disconnects them from the server??
-	
-
-	def leave():
-		print("kicking you out of server")
-
-	def listRooms():
-		print('listrooms called')
-
-	def leaveRoom(roomtoleave):
-		print("leavingRoom:", roomtoleave)
-
-	def joinRoom(self, roomtoEnter):
-		print("inside join room", self.tmpID)
 
 	# msttypeDict = {
 	# 	'JOINROOM' : joinRoom,

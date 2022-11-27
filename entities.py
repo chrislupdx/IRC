@@ -33,9 +33,11 @@ class Server(object):
         #returns false if no recognized command is issued
         parsedType, payload = IRCparse.parse(incoming_cmd)
         if parsedType == self.cmds.DEFAULT:
-            self.do_sendToAllInList(payload, fd, self.userList)
+            self.do_sendToAllInList(payload, fd, self.userList.keys())
         if parsedType == self.cmds.JOINROOM:
             self.do_userJoinRoom(payload,fd)
+        if parsedType == self.cmds.MSGROOM:
+            self.do_messageRoom(payload,fd)
 
     def service_connection(self,key, mask):
         sock = key.fileobj
@@ -86,12 +88,18 @@ class Server(object):
             self.createRoom(roomName)
         (self.roomList[roomName]).addUsertoRoom(fd)
         print("adding user" + self.userList[fd].nick +" to " +roomName)
-
+        self.do_messageRoom("{} {} has joined room {}.".format(roomName,self.userList[fd].nick, roomName),fd)
+    
+    def do_messageRoom(self, payload,fd):
+        roomName = payload.split()[0]
+        toSend = " ".join(payload.split()[1:])
+        usersRoomList = self.roomList[roomName].userList
+        print(toSend)
+        self.do_sendToAllInList(toSend,fd,usersRoomList)
 
     def createRoom(self,roomName):
         newRoom = Room(roomName)
         self.roomList[roomName] = newRoom
-
 
     #returns a 0 for success, -1 for fail
     #todo: can't actually add nicks.  Just do it for ease of testing.
@@ -106,12 +114,23 @@ class Server(object):
         sender = self.userList[fd]
         message = sender.nick + ": " + payload
         messageToSend = bytes("{}".format(message),"utf-8")
-        for fd in userList.keys():
-            sent = userList[fd].sock.send(messageToSend)
+        for fd in userList:
+            sent = self.userList[fd].sock.send(messageToSend)
         return sent
 
+    def do_leave():
+        print("kicking you out of server")
 
- 
+    def do_listRooms():
+        print('listrooms called')
+
+    def do_leaveRoom(roomtoleave):
+        print("leavingRoom:", roomtoleave)
+
+    def do_joinRoom(self, roomtoEnter):
+        print("inside join room", self.tmpID)
+
+
 """    def listRooms(user):
         return []"""
 
