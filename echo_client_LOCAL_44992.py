@@ -3,7 +3,7 @@ from time import sleep
 import selectors
 import sys
 from threading import Thread
-from IRCparse import IRCcommands, parse
+from IRCparse import IRCcommands
 
 HOST, PORT = sys.argv[1], int(sys.argv[2])
 
@@ -21,9 +21,10 @@ def readInput(s):
             s.sendall(bytes("{} {}\r\n".format('DEFAULT', usrMsg),"utf-8"))
         else:
             #we have a command, parse it!
-            cmd, payload = parse(usrMsg)
+            cmd = usrMsg.split()[0]
+            print('cmd is:', cmd)
             if cmd == cmds.joinUSR:
-                s.sendall(bytes("{} {}\r\n".format(cmds.JOIN,payload),"utf-8"))
+                s.sendall(bytes("JOIN {}\r\n".format(usrMsg),"utf-8"))
             if cmd == cmds.quitUSR:
                 #send disconnect request to server.
                 G_quit =True
@@ -42,5 +43,4 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
 
     while not G_quit:
         data = s.recv(1024)
-        to_print = data.decode("utf-8")
-        print(to_print)
+        print(f"Received {data!r}")

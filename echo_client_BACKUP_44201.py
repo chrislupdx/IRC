@@ -21,7 +21,12 @@ def readInput(s):
             s.sendall(bytes("{} {}\r\n".format('DEFAULT', usrMsg),"utf-8"))
         else:
             #we have a command, parse it!
+<<<<<<< HEAD
+            cmd = usrMsg.split()[0]
+            print('cmd is:', cmd)
+=======
             cmd, payload = parse(usrMsg)
+>>>>>>> rooms
             if cmd == cmds.joinUSR:
                 s.sendall(bytes("{} {}\r\n".format(cmds.JOIN,payload),"utf-8"))
             if cmd == cmds.quitUSR:
