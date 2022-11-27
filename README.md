@@ -21,8 +21,12 @@
 # Connecting:
 
 # Client Commands:
-CREATEROOM [roomname]
+/join
+/quit
 
+/leaveroom [roomname]
+/joinroom [roomname]
+/listrooms
 
 # Todo
 - Create usernames
