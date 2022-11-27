@@ -18,7 +18,7 @@ class Server(object):
     def __init__(self, name):
         self.name = name
         self.userList = {}
-        self.roomList = []
+        self.roomList = {}
         #self.conn_list = [] #temporary
         self.sel = None
         self.tmpListOfNames = ["Galadriel", "Elrond", "Frodo", "Gilgalad" ]
@@ -39,16 +39,10 @@ class Server(object):
     def parseCmd(self, incoming_cmd,fd):
         parsedType, payload = IRCparse.parse(incoming_cmd)
         if parsedType == self.cmds.DEFAULT:
-
             return self.do_sendToAllInList(payload, fd, self.userList)
-
-        print("starting parsecmd")
-        #compares incoming_cmd to cmd_list, if match returns, calls function with ongoing paramers in incoming_cmd
-        #returns false if no recognized command is issued
-        print(incoming_cmd)
-        #payload, fd, userList
-        #pull apart incoming
-        # pass
+        if parsedType == self.cmds.JOIN:
+            self.do_userJoinRoom(payload,fd)
+        return 0
 
     def leave():
         print("kicking you out of server")
@@ -67,14 +61,10 @@ class Server(object):
                 sock.close()
         if mask & selectors.EVENT_WRITE:
             if data.outb:
-                print(type(sock))
                 #find what user this came from
                 sent = self.parseCmd(data.outb.decode('utf-8'), sock.fileno())
-                print(sent)
-                print(data.outb)
-                print(data.outb)
-                data.outb = data.outb[sent:] #flush the buffer?
-                print(data.outb)
+                print("sent " + str(sent) + " bytes")
+                data.outb = b'' #flush the buffer?
 
 
     def startServer(self, host, port): 
@@ -86,7 +76,6 @@ class Server(object):
         print(f"Listening on {(host, port)}")
         lsock.setblocking(False)
         lsock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-
         self.sel.register(lsock, selectors.EVENT_READ, data=None)
 
         try:
@@ -104,9 +93,18 @@ class Server(object):
     """
     create a new room object, add it to the room list
     """
+    def do_userJoinRoom(self, roomName, fd):
+        if roomName not in self.roomList.keys():
+            print("creating room " + roomName)
+            self.createRoom(roomName)
+        (self.roomList[roomName]).addUsertoRoom(fd)
+        print("adding user" + self.userList[fd].nick +" to " +roomName)
+
+
     def createRoom(self,roomName):
         newRoom = Room(roomName)
-        self.roomList.append(newRoom)
+        self.roomList[roomName] = newRoom
+
 
     #returns a 0 for success, -1 for fail
     #todo: can't actually add nicks.  Just do it for ease of testing.
@@ -122,9 +120,13 @@ class Server(object):
         message = sender.nick + ": " + payload
         messageToSend = bytes("{}".format(message),"utf-8")
         print("sending:" + messageToSend.decode("utf-8"))
+        print(userList)
         for fd in userList.keys():
+            print(fd)
             sent = userList[fd].sock.send(messageToSend)
         return sent
+
+
  
 """    def listRooms(user):
         return []"""
@@ -142,12 +144,11 @@ class Room(object):
         self.name = name
         self.userList = []
 
-    def listUsers(self):
-        return [u.name for u in self.userList]
-
-    def addUser(fd):
-        if fd not in userList:
+    def addUsertoRoom(self,fd):
+        if fd not in self.userList:
             self.userList.append(fd)
+
+
             
 
 class User(object):
