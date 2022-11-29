@@ -3,7 +3,7 @@ from time import sleep
 import selectors
 import sys
 from threading import Thread
-from IRCparse import IRCcommands, parse
+from IRCparse import *
 
 HOST, PORT = sys.argv[1], int(sys.argv[2])
 
@@ -11,7 +11,7 @@ G_quit = False
 cmds = IRCcommands()
 curRoom = ""
 
-def readInput(s):
+def readInput(s:socket):
     global G_quit
     global cmds
     global curRoom
@@ -25,6 +25,25 @@ def readInput(s):
             else:
                 s.sendall(bytes("{} {}\r\n".format('DEFAULT', usrMsg),"utf-8"))
         else:
+            parsedCmd = parseUserCommand(usrMsg)
+            match parsedCmd:
+                case Connect(host, port):
+                    pass
+                case ListRooms():
+                    pass
+                case JoinRoom(roomname):
+                    pass
+                case LeaveRoom(roomname):
+                    pass
+                case ListRoomUsers(roomname):
+                    pass
+                case MessageRoom(roomnames, message):
+                    pass
+                case Quit():
+                    pass
+                case _:
+                    raise Exception("invalid command entered: " + usrMsg)
+            """
             #we have a command, parse it!
             cmd, payload = parse(usrMsg)
             if cmd == cmds.joinUSR:
@@ -40,6 +59,8 @@ def readInput(s):
                 if len(withoutfirst) > 1:
                     args = withoutfirst
                 s.sendall(bytes("SERVERFUNCTION {}, body {} \r\n".format(cmd, args),"utf-8"))
+            """
+
 with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
     s.connect((HOST, PORT))
 
