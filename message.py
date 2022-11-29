@@ -92,6 +92,11 @@ class RoomUsersList(ServerMessage):
         for roomuser in roomusers: body += roomuser+' '
         super().__init__("ROOMUSERLIST", body)
 
+class RoomMessage(ServerMessage):
+    def __init__(self, roomname, messageBody):
+        body = roomname + ':' + messageBody
+        super.__init__("ROOMMESSAGE", body)
+
 class MessageAck(ServerMessage):
     def __init__(self):
         super().__init__("MESSAGEACK")

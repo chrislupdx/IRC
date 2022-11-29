@@ -97,6 +97,10 @@ def parseServerMessage(unparsedMsg:str) -> Message:
 		case "ROOMUSERLIST":
 			roomusers = [user for user in clean.split(' ')[1:]]
 			return RoomUsersList(roomusers)
+		case "ROOMMESSAGE":
+			roomname = clean.split(' ')[1]
+			messageBody = clean.split(':')[1]
+			return RoomMessage(roomname, messageBody)
 		case "MESSAGEACK":
 			return MessageAck()
 		case "QUIACK":

@@ -30,18 +30,36 @@ def readInput(s:socket):
                 case Connect(host, port):
                     pass
                 case ListRooms():
-                    pass
+                    #send request to server
+                    s.sendall(bytes(str(parsedCmd), 'utf-8'))
+                    #wait for server response
+                    #print list of rooms
                 case JoinRoom(roomname):
-                    pass
+                    #send request to server
+                    s.sendall(bytes(str(parsedCmd), 'utf-8'))
+                    #wait for server ack
+                    #add room to list of joined rooms
                 case LeaveRoom(roomname):
-                    pass
+                    #send request to server
+                    s.sendall(bytes(str(parsedCmd), 'utf-8'))
+                    #wait for server response
+                    #remove room from list of joined rooms
                 case ListRoomUsers(roomname):
-                    pass
+                    #send request to server
+                    s.sendall(bytes(str(parsedCmd), 'utf-8'))
+                    #wait for server response
+                    #print list of users in room
                 case MessageRoom(roomnames, message):
-                    pass
+                    #send request to server
+                    s.sendall(bytes(str(parsedCmd), 'utf-8'))
+                    #wait for ack
                 case Quit():
-                    pass
+                    #send request to server
+                    s.sendall(bytes(str(parsedCmd), 'utf-8'))
+                    #wait for server ack
+                    #disconnect from server
                 case _:
+                    #error in user command, send nothing, reprompt
                     raise Exception("invalid command entered: " + usrMsg)
             """
             #we have a command, parse it!

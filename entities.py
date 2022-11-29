@@ -2,8 +2,8 @@
 import selectors
 import socket
 import types
-import IRCparse
-
+from IRCparse import *
+from message import *
 
 class Server(object):
 
@@ -28,7 +28,8 @@ class Server(object):
         self.addUser(conn, addr, self.tmpListOfNames[self.tmpID])
         self.tmpID +=1
 
-    def parseCmd(self, incoming_cmd, fd):
+    def parseCmd(self, incoming_cmd:str, fd):
+        """
         #compares incoming_cmd to cmd_list, if match returns, calls function with ongoing parameters in incoming_cmd
         #returns false if no recognized command is issued
         parsedType, payload = IRCparse.parse(incoming_cmd)
@@ -38,6 +39,40 @@ class Server(object):
             self.do_userJoinRoom(payload,fd)
         if parsedType == self.cmds.MSGROOM:
             self.do_messageRoom(payload,fd)
+        """
+        #incoming_cmd is command generated from user message
+        userMessage = parseUserMessage(incoming_cmd)
+        match userMessage:
+            case Connect(host, port):
+                #add user??
+                #do we need this case???
+                pass
+            case ListRooms():
+                #send RoomList 
+                pass
+            case JoinRoom(roomname):
+                #add user to room
+                #send JoinRoomAck to user
+                pass
+            case LeaveRoom(roomname):
+                #remove user from room
+                #send LeaveRoomAck
+                pass
+            case ListRoomUsers(roomname):
+                #send RoomUsersList
+                pass
+            case MessageRoom(roomnames, messageBody):
+                #send a RoomMessage to every user in every room in roonames
+                #send MessageAck 
+                pass
+            case UserCheckIn():
+                #update user time out
+                pass
+            case Quit():
+                #remove user
+                #send QuitAck
+                pass
+            
 
     def service_connection(self,key, mask):
         sock = key.fileobj
