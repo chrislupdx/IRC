@@ -144,7 +144,7 @@ class Client():
                                     self.curRoom = ""
                             case _:
                                 raise Exception("received invalid server reply to LeaveRoom: " + str(reply))                   
-                    case ListRoomUsers(roomname):
+                    case ListRoomUsers(roomname=roomname):
                         #send request to server
                         s.sendall(bytes(str(parsedCmd), 'utf-8'))
                         #wait for server response
@@ -155,7 +155,7 @@ class Client():
                                 for user in roomusers: print(user)
                             case _:
                                 raise Exception("recieved invalid server reply to LeaveRoom: " + str(reply))
-                    case MessageRoom(roomname, message):
+                    case MessageRoom(roomname=roomname, messageBody=message):
                         #send request to server
                         s.sendall(bytes(str(parsedCmd), 'utf-8'))
                         reply = self.getReply()

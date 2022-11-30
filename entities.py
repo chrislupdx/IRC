@@ -44,30 +44,30 @@ class Server(object):
         userMessage = parseUserMessage(incoming_cmd)
         #userMessage is incoming_cmd parsed into a Messege for easy matching
         match userMessage:
-            case Connect(host, port):
+            case Connect(host=host, port=port):
                 #add user??
                 #do we need this case???
                 pass
             case ListRooms():
                 #send RoomList 
                 pass
-            case JoinRoom(roomname):
+            case JoinRoom(roomname=roomname):
                 #add user to room
                 #send JoinRoomAck to user
                 pass
-            case LeaveRoom(roomname):
+            case LeaveRoom(roomname=roomname):
                 #remove user from room
                 #send LeaveRoomAck
                 pass
-            case ListRoomUsers(roomname):
+            case ListRoomUsers(roomname=roomname):
                 #send RoomUsersList
                 pass
-            case MessageRoom(roomnames, messageBody):
+            case MessageRoom(roomname=roomname, messageBody=messageBody):
                 #send a RoomMessage to every user in every room in roonames
-                for roomname in roomnames:
+                for roomname in roomname:
                     #roomName = payload.split()[0]
                     toSend = RoomMessage(roomname, messageBody)#" ".join(payload.split()[1:])
-                    usersRoomList = self.roomList[roomname].userList
+                    usersRoomList = self.roomList[roomname]
                     print(str(toSend))
                     #fd = self.roomList[roomname]
                     self.do_sendToAllInList(toSend,fd,usersRoomList)
