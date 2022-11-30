@@ -52,18 +52,18 @@ class Server(object):
             case ListRooms():
                 self.do_listRooms(fd)
             case JoinRoom(roomname=roomname):
+                #send JoinRoomAck to user
+                #self.userList[fd].sock.send(bytes(str(JoinRoomAck(roomname)), 'utf-8'))
                 #add user to room
                 self.do_userJoinRoom(roomname, fd)
-                #send JoinRoomAck to user
-                self.userList[fd].sock.send(bytes(str(JoinRoomAck(roomname)), 'utf-8'))
             case LeaveRoom(roomname=roomname):
                 #remove user from room
                 self.do_leaveRoom(roomname, fd)
                 #send LeaveRoomAck
-                self.userList[fd].sock.send(bytes(str(LeaveRoomAck()), 'utf-8'))
+                #self.userList[fd].sock.send(bytes(str(LeaveRoomAck()), 'utf-8'))
             case ListRoomUsers(roomname=roomname):
                 #send RoomUsersList
-                self.do_listRoomUsers
+                self.do_listRoomUsers()
             case MessageRoom(roomname=roomname, messageBody=messageBody):
                 #send a RoomMessage to every user in every room
                 #roomName = payload.split()[0]
@@ -72,7 +72,7 @@ class Server(object):
                 #print(str(toSend))
                 self.do_sendToAllInList(toSend,fd,usersRoomList)
                 #send MessageAck 
-                self.userList[fd].sock.send(bytes(str(MessageAck())), 'utf-8')
+                #self.userList[fd].sock.send(bytes(str(MessageAck())), 'utf-8')
             case UserCheckIn():
                 #update user time out
                 pass
@@ -136,15 +136,22 @@ class Server(object):
             print("creating room " + roomName)
             self.createRoom(roomName)
         (self.roomList[roomName]).addUsertoRoom(fd)
-        print("adding user" + self.userList[fd].nick +" to " +roomName)
-        self.do_messageRoom("{} {} has joined room {}.".format(roomName,self.userList[fd].nick, roomName),fd)
-    
-    def do_messageRoom(self, payload,fd):
-        roomName = payload.split()[0]
-        toSend = " ".join(payload.split()[1:])
-        usersRoomList = self.roomList[roomName].userList
-        print(toSend)
-        self.do_sendToAllInList(toSend,fd,usersRoomList)
+        print("adding user " + self.userList[fd].nick +" to " +roomName)
+        #self.do_messageRoom("{} {} has joined room {}.".format(roomName,self.userList[fd].nick, roomName),fd)
+        self.do_messageRoom(RoomMessage(roomName, f"{self.userList[fd].nick} has joined {roomName}"), fd)
+
+    def do_messageRoom(self, message,fd):
+        #roomName = payload.split()[0]
+        #toSend = " ".join(payload.split()[1:])
+        #roomName = message.roomName
+        #print("top of do messageRoom, message: " + repr(message))
+        match message:
+            case RoomMessage():
+                usersRoomList = self.roomList[message.roomname].userList
+                print(str(message))
+                self.do_sendToAllInList(message,fd,usersRoomList)
+            case _:
+                raise Exception("recieved invalid message in do_messageRoom: " + str(message))
 
     def createRoom(self,roomName):
         newRoom = Room(roomName)
@@ -159,12 +166,12 @@ class Server(object):
         self.userList[fd] = User(fd, sock, addr, nickname)
 
     #parsed commands here?
-    def do_sendToAllInList(self,payload, fd, userList):
-        sender = self.userList[fd]
-        message = sender.nick + ": " + payload
-        messageToSend = bytes("{}".format(message),"utf-8")
+    def do_sendToAllInList(self,message, fd, userList):
+        #sender = self.userList[fd]
+        #message = sender.nick + ": " + payload
+        #messageToSend = bytes("{}".format(message),"utf-8")
         for fd in userList:
-            sent = self.userList[fd].sock.send(messageToSend)
+            sent = self.userList[fd].sock.send(bytes(str(message), 'utf-8'))
         return sent
 
     def do_quit(self, fd):
