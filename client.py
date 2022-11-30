@@ -19,12 +19,12 @@ class Client():
     
     def run(self):
         self.s.connect((HOST, PORT))
-        t = Thread(group=None,target=client.readInput, name="ReadsFromStdin",args=[s])
+        t = Thread(group=None,target=client.readInput, name="ReadsFromStdin",args=[self.s])
         t.start()
 
     def getReply(self):
         while not self.G_quit:
-            data = s.recv(1024)
+            data = self.s.recv(1024)
             return self.ParseServerMessage(data)            
     
     def parseUserCommand(self, entry:str) -> Message:
@@ -91,7 +91,7 @@ class Client():
                 raise Exception("recieved invalid server message: " + serverMessage)
     
     def readInput(self, s:socket):
-        while not G_quit:
+        while not self.G_quit:
             usrMsg = input()
             if usrMsg[0]!="/":
                 #they are just typing into whatever chat window they had last
@@ -103,7 +103,7 @@ class Client():
             else:
                 parsedCmd = self.parseUserCommand(usrMsg)
                 match parsedCmd:
-                    case Connect(host, port):
+                    case Connect(host=host, port=port):
                         pass
                     case ListRooms():
                         #send request to server
@@ -116,7 +116,7 @@ class Client():
                                 for room in roomnames: print(room)
                             case _:
                                 raise Exception("received invalid server reply to ListRooms: " + str(reply))
-                    case JoinRoom(roomname):
+                    case JoinRoom(roomname=roomname):
                         #send request to server
                         s.sendall(bytes(str(parsedCmd), 'utf-8'))
                         #wait for server ack
@@ -128,7 +128,7 @@ class Client():
                                 self.curRoom = roomname
                             case _:
                                 raise Exception("recieved invalid server reply to ListRooms: " + str(reply))
-                    case LeaveRoom(roomname):
+                    case LeaveRoom(roomname=roomname):
                         if roomname not in self.rooms:
                             print("cannot leave room, not in room")
                             continue

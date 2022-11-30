@@ -81,7 +81,7 @@ class Server(object):
                 #send QuitAck
                 pass
             
-    def send_message(self, fd, message:Message):
+   # def send_message(self, fd, message:Message):
 
 
     def service_connection(self,key, mask):
@@ -94,7 +94,7 @@ class Server(object):
                 data.outb += recv_data
             else:
                 print(f"Closing connection to {data.addr}")
-                sel.unregister(sock)
+                self.sel.unregister(sock)
                 sock.close()
         if mask & selectors.EVENT_WRITE:
             if data.outb:
