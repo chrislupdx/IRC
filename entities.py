@@ -1,4 +1,5 @@
 #example code taken from RealPython socket tutorial
+from collections import UserList
 import selectors
 import socket
 import types
@@ -95,6 +96,9 @@ class Server(object):
                 data.outb += recv_data
             else:
                 print(f"Closing connection to {data.addr}")
+                #remove this fd from the roomlists and the userlist.
+                if sock.fileno() in self.userList.keys():
+                    self.do_quit(sock.fileno())
                 self.sel.unregister(sock)
                 sock.close()
         if mask & selectors.EVENT_WRITE:
@@ -177,7 +181,7 @@ class Server(object):
     def do_quit(self, fd):
         print(f"kicking {fd} out of server")
         for room in self.roomList:
-            if fd in room.userList: del room.userList[fd]
+            if fd in self.roomList[room].userList: self.roomList[room].userList.remove(fd)
         del self.userList[fd]
 
     def do_listRooms(self, fd):
