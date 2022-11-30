@@ -39,14 +39,11 @@ class ListRoomUsers(UserMessage):
         super().__init__("LISTROOMUSERS", roomname)
 
 class MessageRoom(UserMessage):
-    def __init__(self, roomnames, messageBody):
-        self.roomnames = roomnames
+    def __init__(self, roomname, messageBody):
         self.messageBody = messageBody
-        body = ''
-        for roomname in roomnames:
-            body += "#"+roomname+' '
-        body += ":"+messageBody
-        super().__init__("MESSAGE", body)
+        self.roomname = roomname
+        body = '#roomname : ' + messageBody
+        super().__init__("MESSAGEROOM", body)
 
 class UserCheckIn(UserMessage):
     def __init__(self):

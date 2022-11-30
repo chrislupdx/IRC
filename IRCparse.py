@@ -35,30 +35,38 @@ def parse(unparsed):
 	return cmd, payload
 """
 
-def parseUserCommand(entry:str) -> Message:
+""" Moved to client.py
+def parseUserCommand(user, entry:str) -> Message:
 	cmd = entry.split(' ')[0]
 	match cmd:
+		#user typed "/connect HOST PORT"
 		case "/connect":
 			host = entry.split(' ')[1]
 			port = entry.split(' ')[2]
 			return Connect(host, port)
+		#user typed "/listrooms"
 		case "/listrooms":
 			return ListRooms()
+		#user typed "/join roomname"
 		case "/join":
 			roomname = entry.split(' ')[1]
 			return JoinRoom(roomname)
+		#user typed "/leave roomname"
 		case "/leave":
 			roomname = entry.split(' ')[1]
 			return LeaveRoom(roomname)
+		#user typed "/list roomname"
 		case "/list":
 			roomname = entry.split(' ')[1]
 			return ListRoomUsers(roomname)
+		#usertyped "/msg messagebody"
 		case "/msg":
 			roomnames = [roomname[1:] for roomname in entry.split(' ') if roomname[0]=="#"]
 			message = entry.split(":")[1]
 			return MessageRoom(roomnames, message)
 		case "/quit":
 			return Quit()
+"""
 
 def parseUserMessage(unparsedMsg:str) -> Message:
 	clean = unparsedMsg.strip()
@@ -73,9 +81,9 @@ def parseUserMessage(unparsedMsg:str) -> Message:
 		case "LISTROOMUSERS":
 			return ListRoomUsers(clean.split(' ')[1])
 		case "MESSAGE":
-			body = clean.split(' ')
-			roomnames = [roomname[1:] for roomname in body if roomname[0] == "#"] 
-			return MessageRoom(roomnames, body.split(":")[1])
+			roomname = clean.split(' ')[1][1:]
+			messageBody = clean.split(':').strip()
+			return MessageRoom(roomname, messageBody)
 		case "CHECKIN":
 			return UserCheckIn()
 		case "QUIT":

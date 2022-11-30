@@ -14,8 +14,8 @@ class Server(object):
         #self.conn_list = [] #temporary
         self.sel = None
         self.tmpListOfNames = ["Galadriel", "Elrond", "Frodo", "Gilgalad" ]
-        self.tmpID = 0;
-        self.cmds = IRCparse.IRCcommands()
+        self.tmpID = 0
+        #self.cmds = IRCparse.IRCcommands()
 
     def accept_wrapper(self,sock):
         conn, addr = sock.accept()  # Should be ready to read
@@ -40,8 +40,9 @@ class Server(object):
         if parsedType == self.cmds.MSGROOM:
             self.do_messageRoom(payload,fd)
         """
-        #incoming_cmd is command generated from user message
+        #incoming_cmd is string read in through socket
         userMessage = parseUserMessage(incoming_cmd)
+        #userMessage is incoming_cmd parsed into a Messege for easy matching
         match userMessage:
             case Connect(host, port):
                 #add user??
@@ -63,8 +64,15 @@ class Server(object):
                 pass
             case MessageRoom(roomnames, messageBody):
                 #send a RoomMessage to every user in every room in roonames
-                #send MessageAck 
-                pass
+                for roomname in roomnames:
+                    #roomName = payload.split()[0]
+                    toSend = RoomMessage(roomname, messageBody)#" ".join(payload.split()[1:])
+                    usersRoomList = self.roomList[roomname].userList
+                    print(str(toSend))
+                    #fd = self.roomList[roomname]
+                    self.do_sendToAllInList(toSend,fd,usersRoomList)
+                    #send MessageAck 
+                    pass
             case UserCheckIn():
                 #update user time out
                 pass
@@ -73,6 +81,8 @@ class Server(object):
                 #send QuitAck
                 pass
             
+    def send_message(self, fd, message:Message):
+
 
     def service_connection(self,key, mask):
         sock = key.fileobj
