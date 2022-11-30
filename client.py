@@ -169,13 +169,10 @@ class Client():
                                 raise Exception("received invalid server reply to MessageRoom: " + str(reply))
                     case Quit():
                         #send request to server
+                        print("quitting....")
                         s.sendall(bytes(str(parsedCmd), 'utf-8'))
-                        #wait for server ack
-                        reply = self.getReply()
-                        match reply:
-                            case QuitAck():
-                                print("disconnecting from server")
-                                G_quit = True
+                        self.G_quit = True
+
                     case _:
                         #error in user command, send nothing, reprompt
                         raise Exception("invalid command entered: " + usrMsg)

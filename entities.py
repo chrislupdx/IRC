@@ -13,7 +13,7 @@ class Server(object):
         self.roomList = {}
         #self.conn_list = [] #temporary
         self.sel = None
-        self.tmpListOfNames = ["Galadriel", "Elrond", "Frodo", "Gilgalad" ]
+        self.tmpListOfNames = ["Galadriel", "Elrond", "Frodo", "Gilgalad", "Gollum","Morgoth","Turin","Feanor","Legolas","Gimli","Varda","Elwing" ]
         self.tmpID = 0
         #self.cmds = IRCparse.IRCcommands()
 
@@ -80,7 +80,7 @@ class Server(object):
                 #remove user
                 self.do_quit(fd)
                 #send QuitAck
-                self.userList[fd].sock.send(bytes(str(QuitAck()), 'utf-8'))
+                #self.userList[fd].sock.send(bytes(str(QuitAck()), 'utf-8'))
             case _:
                 print(f"found bad message from {fd}: {userMessage}")
 
@@ -115,12 +115,13 @@ class Server(object):
 
         try:
             while True:
-                events = self.sel.select(timeout=None)
+                events = self.sel.select(timeout=3)
                 for key, mask in events:
                     if key.data is None:
                         self.accept_wrapper(key.fileobj)
                     else:
                         self.service_connection(key, mask)
+
         except KeyboardInterrupt:
             print("Caught keyboard interrupt, exiting")
         finally:
@@ -128,6 +129,8 @@ class Server(object):
     """
     create a new room object, add it to the room list
     """
+
+
     def do_userJoinRoom(self, roomName, fd):
         if roomName not in self.roomList.keys():
             print("creating room " + roomName)
@@ -167,8 +170,8 @@ class Server(object):
     def do_quit(self, fd):
         print(f"kicking {fd} out of server")
         for room in self.roomList:
-            if fd in room.userList: room.userList.remove(fd)
-        self.userList.remove(fd)
+            if fd in room.userList: del room.userList[fd]
+        del self.userList[fd]
 
     def do_listRooms(self, fd):
         print(f'sent list of rooms to {fd}')

@@ -51,7 +51,7 @@ class UserCheckIn(UserMessage):
 
 class Quit(UserMessage):
     def __init__(self):
-        super().__init__("QUIT")
+        super().__init__("QUIT","")
 
 """
 Server Messages:
@@ -101,7 +101,3 @@ class MessageAck(ServerMessage):
 class ServerCheckin(ServerMessage):
     def __init__(self):
         super().__init__("CHECKIN")
-
-class QuitAck(ServerMessage):
-    def __init__(self):
-        super.__init__("QUITACK")
