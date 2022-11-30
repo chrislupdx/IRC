@@ -134,14 +134,10 @@ class Server(object):
             self.createRoom(roomName)
         (self.roomList[roomName]).addUsertoRoom(fd)
         print("adding user " + self.userList[fd].nick +" to " +roomName)
-        #self.do_messageRoom("{} {} has joined room {}.".format(roomName,self.userList[fd].nick, roomName),fd)
         self.do_messageRoom(RoomMessage(roomName, f"{self.userList[fd].nick} has joined {roomName}"), fd)
 
+    #sends a messagge to all users in the room from user at fd
     def do_messageRoom(self, message,fd):
-        #roomName = payload.split()[0]
-        #toSend = " ".join(payload.split()[1:])
-        #roomName = message.roomName
-        #print("top of do messageRoom, message: " + repr(message))
         match message:
             case RoomMessage():
                 usersRoomList = self.roomList[message.roomname].userList
@@ -150,6 +146,7 @@ class Server(object):
             case _:
                 raise Exception("recieved invalid message in do_messageRoom: " + str(message))
 
+    #creates a new room and adds it to list
     def createRoom(self,roomName):
         newRoom = Room(roomName)
         self.roomList[roomName] = newRoom
@@ -162,11 +159,8 @@ class Server(object):
             return -1 #TODO then kick them
         self.userList[fd] = User(fd, sock, addr, nickname)
 
-    #parsed commands here?
+    #sends message to all users in list
     def do_sendToAllInList(self,message, fd, userList):
-        #sender = self.userList[fd]
-        #message = sender.nick + ": " + payload
-        #messageToSend = bytes("{}".format(message),"utf-8")
         for fd in userList:
             sent = self.userList[fd].sock.send(bytes(str(message), 'utf-8'))
         return sent

@@ -64,30 +64,12 @@ class ServerMessage(Message):
     def __init__(self, header, body):
         super().__init__(header, body)
 
-"""
-class ConnectAck(ServerMessage):
-    def __init__(self):
-        super().__init__("CONNECTACK")
-"""
-
 class RoomList(ServerMessage):
     def __init__(self, roomlist):
         self.roomlist = roomlist
         body = ''
         for room in roomlist: body += room+' '
         super().__init__("ROOMLIST", body)
-
-"""
-class JoinRoomAck(ServerMessage):
-    def __init__(self, roomname):
-        super().__init__("JOINROOMACK", roomname)
-"""
-
-"""
-class LeaveRoomAck(ServerMessage):
-    def __init__(self, roomname):
-        super().__init__("LEAVEROOMACK", roomname)
-"""
 
 class RoomUsersList(ServerMessage):
     def __init__(self, roomusers):
@@ -97,24 +79,14 @@ class RoomUsersList(ServerMessage):
         super().__init__("ROOMUSERLIST", body)
 
 class RoomMessage(ServerMessage):
-    def __init__(self, roomname, messageBody):
+    def __init__(self, sender, roomname, messageBody):
+        self.sender = sender
         self.roomname = roomname
         self.messageBody = messageBody
-        body = roomname + ':' + messageBody
+        body = sender + ':' + roomname + ' : ' + messageBody
         super().__init__("ROOMMESSAGE", body)
-
-"""
-class MessageAck(ServerMessage):
-    def __init__(self):
-        super().__init__("MESSAGEACK")
-"""
 
 class ServerCheckin(ServerMessage):
     def __init__(self):
         super().__init__("CHECKIN")
 
-"""
-class QuitAck(ServerMessage):
-    def __init__(self):
-        super().__init__("QUITACK")
-"""
