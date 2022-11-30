@@ -4,6 +4,7 @@ import selectors
 import sys
 from threading import Thread
 from IRCparse import *
+import select
 
 HOST, PORT = sys.argv[1], int(sys.argv[2])
 
@@ -16,15 +17,35 @@ class Client():
         self.G_quit = False
         self.rooms = []
         self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        #self.s.setblocking(False)
     
-    def run(self):
-        self.s.connect((HOST, PORT))
-        t = Thread(group=None,target=client.readInput, name="ReadsFromStdin",args=[self.s])
-        t.start()
+    def readSocket(self, s:socket):
+        self.s.setblocking(0)
         while not self.G_quit:
-            data = self.s.recv(1024)
-            serverMsg = self.parseServerMessage(data.decode('utf-8'))
-            self.executeServerMessage(serverMsg)            
+            #data = self.s.recv(1024)
+            self.s.setblocking(0)
+            ready = select.select([self.s], [], [], 1)
+            if ready[0]:
+                data = self.s.recv(4096)
+                if data==b'':
+                    print("Server disconnected.")
+                    self.G_quit = True
+                    return
+                serverMsg = self.parseServerMessage(data.decode('utf-8'))
+                self.executeServerMessage(serverMsg)   
+
+    def run(self):
+        self.s.connect((self.host, self.port))
+        #self.s.bind((self.host, self.port))
+        #self.s.listen(1)
+        #conn, addr = self.s.accept()
+        t = Thread(group=None,target=client.readInput, name="ReadsFromStdin",args=[self.s])
+        t.start()      
+        s = Thread(group=None,target=client.readSocket, name="ReadsFromSocket",args=[self.s])
+        s.start()
+        while not self.G_quit:
+            sleep(.1)
+        sys.exit()
     
     def parseUserCommand(self, entry:str) -> Message:
         cmd = entry.split(' ')[0]
@@ -78,7 +99,7 @@ class Client():
             case "CHECKIN":
                 return ServerCheckin()
             case _:
-                raise Exception("recieved invalid server message: " + serverMessage)
+                return RoomMessage("SERVER ", serverMessage)
         
     def executeServerMessage(self, serverMsg):
         match serverMsg:
@@ -131,13 +152,10 @@ class Client():
                         s.sendall(bytes(str(parsedCmd), 'utf-8'))
                     case Quit():
                         #send request to server
+                        print("quitting....")
                         s.sendall(bytes(str(parsedCmd), 'utf-8'))
-                        #wait for server ack
-                        reply = self.getReply()
-                        match reply:
-                            case QuitAck():
-                                print("disconnecting from server")
-                                G_quit = True
+                        self.G_quit = True
+
                     case _:
                         #error in user command, send nothing, reprompt
                         print("invalid user command")
