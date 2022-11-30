@@ -12,7 +12,7 @@ class Message:
         print('body is ', body)
     
 class UserMessage(Message):
-    def __init__(self, header, body):
+    def __init__(self, header, body=''):
         super().__init__(header, body)
     
 class Connect(UserMessage):
@@ -42,7 +42,7 @@ class MessageRoom(UserMessage):
     def __init__(self, roomname, messageBody):
         self.messageBody = messageBody
         self.roomname = roomname
-        body = '#roomname : ' + messageBody
+        body = '#'+roomname+' : ' + messageBody
         super().__init__("MESSAGEROOM", body)
 
 class UserCheckIn(UserMessage):
@@ -75,7 +75,7 @@ class RoomList(ServerMessage):
         self.roomlist = roomlist
         body = ''
         for room in roomlist: body += room+' '
-        super().init("ROOMLIST", body)
+        super().__init__("ROOMLIST", body)
 
 """
 class JoinRoomAck(ServerMessage):
@@ -91,6 +91,7 @@ class LeaveRoomAck(ServerMessage):
 
 class RoomUsersList(ServerMessage):
     def __init__(self, roomusers):
+        self.roomusers = roomusers
         body=''
         for roomuser in roomusers: body += roomuser+' '
         super().__init__("ROOMUSERLIST", body)

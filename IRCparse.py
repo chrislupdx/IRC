@@ -83,6 +83,9 @@ def parseUserMessage(unparsedMsg:str) -> Message:
 		case "MESSAGE":
 			roomname = clean.split(' ')[1][1:]
 			messageBody = clean.split(':').strip()
+			print("found MESSAGE in parseUserMessage")
+			print("roomname: "+roomname)
+			print("messageBody: "+messageBody)
 			return MessageRoom(roomname, messageBody)
 		case "CHECKIN":
 			return UserCheckIn()

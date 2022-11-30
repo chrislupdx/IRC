@@ -54,6 +54,7 @@ class Client():
             #usertyped "/msg messagebody"
             case "/msg":
                 message = ' '.join(entry.split(' ')[1:])
+                print("sending to room: " + message)
                 return MessageRoom(self.curRoom, message)
             #user typed "/msgroom #roomname : messageBody"
             case "/msgroom":
@@ -97,7 +98,7 @@ class Client():
             case RoomList(roomlist=roomlist):
                 print("Available Rooms: ")
                 for room in roomlist: print(room)
-            case RoomUsersList(roomlist=roomusers):
+            case RoomUsersList(roomusers=roomusers):
                 print("Users in room: ")
                 for user in roomusers: print(user)
             case RoomMessage(roomname=roomname, messageBody=messageBody):

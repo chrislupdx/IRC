@@ -63,7 +63,7 @@ class Server(object):
                 #self.userList[fd].sock.send(bytes(str(LeaveRoomAck()), 'utf-8'))
             case ListRoomUsers(roomname=roomname):
                 #send RoomUsersList
-                self.do_listRoomUsers()
+                self.do_listRoomUsers(roomname, fd)
             case MessageRoom(roomname=roomname, messageBody=messageBody):
                 #send a RoomMessage to every user in every room
                 #roomName = payload.split()[0]
@@ -179,17 +179,18 @@ class Server(object):
 
     def do_listRooms(self, fd):
         print(f'sent list of rooms to {fd}')
-        msg = RoomList([room.name for room in self.roomList])
+        msg = RoomList([self.roomList[room].name for room in self.roomList])
         self.userList[fd].sock.send(bytes(str(msg), 'utf-8'))
 
     def do_leaveRoom(self, roomtoleave, fd):
         print("leavingRoom:", roomtoleave)
-        self.roomList[roomtoleave].remove(fd)
-    
+        self.roomList[roomtoleave].userList.remove(fd)
+        
+
     def do_listRoomUsers(self, roomToList, fd):
         print(f'sending list of users in {roomToList} to {fd}')
         #should be nickname??
-        msg = RoomUsersList([str(user.fd) for user in self.roomList[roomToList]])
+        msg = RoomUsersList([self.userList[user].nick for user in self.roomList[roomToList].userList])
         self.userList[fd].sock.send(bytes(str(msg), 'utf-8'))
 
     #def do_joinRoom(self, roomtoEnter):
