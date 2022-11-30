@@ -25,7 +25,7 @@ class Client():
     def getReply(self):
         while not self.G_quit:
             data = self.s.recv(1024)
-            return self.parseServerMessage(str(data))            
+            return self.parseServerMessage(data.decode('utf-8'))            
     
     def parseUserCommand(self, entry:str) -> Message:
         cmd = entry.split(' ')[0]
