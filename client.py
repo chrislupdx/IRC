@@ -40,8 +40,6 @@ class Client():
             #user typed "/join roomname"
             case "/join":
                 roomname = entry.split(' ')[1]
-                print(f"found a join message, body: {roomname}")
-                print(f"message as string: {JoinRoom(roomname=roomname)}")
                 return JoinRoom(roomname=roomname)
             #user typed "/leave roomname"
             case "/leave":
@@ -54,7 +52,6 @@ class Client():
             #usertyped "/msg messagebody"
             case "/msg":
                 message = ' '.join(entry.split(' ')[1:])
-                print("sending to room: " + message)
                 return MessageRoom(self.curRoom, message)
             #user typed "/msgroom #roomname : messageBody"
             case "/msgroom":
@@ -74,8 +71,8 @@ class Client():
                 roomusers = [user for user in serverMessage.split(' ')[1:]]
                 return RoomUsersList(roomusers)
             case "ROOMMESSAGE":
-                sender = serverMessage.split(' ').split(":")[0]
-                roomname = serverMessage.split(' ').split(':')[1]
+                sender = serverMessage.split(' ')[1].split(":")[0]
+                roomname = serverMessage.split(' ')[1].split(':')[1]
                 messageBody = serverMessage.split(':')[2].strip()
                 return RoomMessage(sender, roomname, messageBody)
             case "CHECKIN":

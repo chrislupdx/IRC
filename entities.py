@@ -29,18 +29,7 @@ class Server(object):
         self.tmpID +=1
 
     def parseCmd(self, incoming_cmd:str, fd):
-        """
-        #compares incoming_cmd to cmd_list, if match returns, calls function with ongoing parameters in incoming_cmd
-        #returns false if no recognized command is issued
-        parsedType, payload = IRCparse.parse(incoming_cmd)
-        if parsedType == self.cmds.DEFAULT:
-            self.do_sendToAllInList(payload, fd, self.userList.keys())
-        if parsedType == self.cmds.JOINROOM:
-            self.do_userJoinRoom(payload,fd)
-        if parsedType == self.cmds.MSGROOM:
-            self.do_messageRoom(payload,fd)
-        """
-        print(f"top of parseCmd, incoming_cmd: {incoming_cmd}")
+        #print(f"top of parseCmd, incoming_cmd: {incoming_cmd}")
         #incoming_cmd is string read in through socket
         userMessage = parseUserMessage(incoming_cmd)
         #userMessage is incoming_cmd parsed into a Messege for easy matching
@@ -52,27 +41,18 @@ class Server(object):
             case ListRooms():
                 self.do_listRooms(fd)
             case JoinRoom(roomname=roomname):
-                #send JoinRoomAck to user
-                #self.userList[fd].sock.send(bytes(str(JoinRoomAck(roomname)), 'utf-8'))
-                #add user to room
                 self.do_userJoinRoom(roomname, fd)
             case LeaveRoom(roomname=roomname):
                 #remove user from room
                 self.do_leaveRoom(roomname, fd)
-                #send LeaveRoomAck
-                #self.userList[fd].sock.send(bytes(str(LeaveRoomAck()), 'utf-8'))
             case ListRoomUsers(roomname=roomname):
                 #send RoomUsersList
                 self.do_listRoomUsers(roomname, fd)
-            case MessageRoom(roomname=roomname, messageBody=messageBody):
+            case MessageRoom( roomname=roomname, messageBody=messageBody):
                 #send a RoomMessage to every user in every room
-                #roomName = payload.split()[0]
-                toSend = RoomMessage(roomname, messageBody)#" ".join(payload.split()[1:])
+                toSend = RoomMessage(self.userList[fd].name, roomname, messageBody)
                 usersRoomList = self.roomList[roomname]
-                #print(str(toSend))
                 self.do_sendToAllInList(toSend,fd,usersRoomList)
-                #send MessageAck 
-                #self.userList[fd].sock.send(bytes(str(MessageAck())), 'utf-8')
             case UserCheckIn():
                 #update user time out
                 pass
@@ -125,6 +105,7 @@ class Server(object):
             print("Caught keyboard interrupt, exiting")
         finally:
             self.sel.close()
+
     """
     create a new room object, add it to the room list
     """
@@ -134,7 +115,7 @@ class Server(object):
             self.createRoom(roomName)
         (self.roomList[roomName]).addUsertoRoom(fd)
         print("adding user " + self.userList[fd].nick +" to " +roomName)
-        self.do_messageRoom(RoomMessage(roomName, f"{self.userList[fd].nick} has joined {roomName}"), fd)
+        self.do_messageRoom(RoomMessage(self.name, roomName, f"{self.userList[fd].nick} has joined {roomName}"), fd)
 
     #sends a messagge to all users in the room from user at fd
     def do_messageRoom(self, message,fd):
@@ -187,17 +168,6 @@ class Server(object):
         msg = RoomUsersList([self.userList[user].nick for user in self.roomList[roomToList].userList])
         self.userList[fd].sock.send(bytes(str(msg), 'utf-8'))
 
-    #def do_joinRoom(self, roomtoEnter):
-        #print("inside join room", self.tmpID)
-
-
-"""    def listRooms(user):
-        return []"""
-
-"""    def doesNickExist(newNick):
-        for user in userList:
-            if user"""
-        
 """
 class represents a room on the server
 """        
@@ -210,9 +180,6 @@ class Room(object):
     def addUsertoRoom(self,fd):
         if fd not in self.userList:
             self.userList.append(fd)
-
-
-            
 
 class User(object):
     #todo: can't actually add nicks.  Just do it for testing.
@@ -227,8 +194,3 @@ class User(object):
     def setNick(self,nickname):
         self.nick = nickname
 
-    """
-    def joinRoom(self, roomName):
-        #send message to server asking to join room
-        self.roomList.append(roomName)
-    """
