@@ -93,15 +93,9 @@ def parseServerMessage(unparsedMsg:str) -> Message:
 	clean = unparsedMsg.strip()
 	header = clean.split(' ')[0]
 	match header:
-		case "CONNECTACK":
-			return ConnectAck()
 		case "ROOMLIST":
 			roomlist = [room for room in clean.split(' ')[1:]]
 			return RoomList(roomlist)
-		case "JOINROOMACK":
-			return JoinRoomAck()
-		case "LEAVEROOMACK":
-			return LeaveRoomAck()
 		case "ROOMUSERLIST":
 			roomusers = [user for user in clean.split(' ')[1:]]
 			return RoomUsersList(roomusers)
@@ -109,7 +103,5 @@ def parseServerMessage(unparsedMsg:str) -> Message:
 			roomname = clean.split(' ')[1]
 			messageBody = clean.split(':')[1]
 			return RoomMessage(roomname, messageBody)
-		case "MESSAGEACK":
-			return MessageAck()
 		case "QUIACK":
 			return QuitAck()
