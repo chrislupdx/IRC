@@ -21,7 +21,12 @@
 # Connecting:
 
 # Client Commands:
-/join
+/listrooms - client sends ListRooms() message
+/join roomname - client sends JoinRoom(roomname) message
+/leave roomname - cliend sends LeaveRoom(roomname)
+/list roomname - client sends ListRoomUsers()
+/msg messagebody - client sends MessageRoom(curRoom, messageBody)
+/msgroom #roomname : messageBody - client sends MessageRoom(roomname, messageBody)
 /quit
 
 /leaveroom [roomname]
