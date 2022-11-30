@@ -63,16 +63,14 @@ class Server(object):
                 #send RoomUsersList
                 pass
             case MessageRoom(roomname=roomname, messageBody=messageBody):
-                #send a RoomMessage to every user in every room in roonames
-                for roomname in roomname:
-                    #roomName = payload.split()[0]
-                    toSend = RoomMessage(roomname, messageBody)#" ".join(payload.split()[1:])
-                    usersRoomList = self.roomList[roomname]
-                    print(str(toSend))
-                    #fd = self.roomList[roomname]
-                    self.do_sendToAllInList(toSend,fd,usersRoomList)
-                    #send MessageAck 
-                    pass
+                #send a RoomMessage to every user in every room
+                #roomName = payload.split()[0]
+                toSend = RoomMessage(roomname, messageBody)#" ".join(payload.split()[1:])
+                usersRoomList = self.roomList[roomname]
+                print(str(toSend))
+                self.do_sendToAllInList(toSend,fd,usersRoomList)
+                #send MessageAck 
+                self.userList[fd].sock.send(bytes(str(MessageAck())), 'utf-8')
             case UserCheckIn():
                 #update user time out
                 pass

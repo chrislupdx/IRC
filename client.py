@@ -52,7 +52,7 @@ class Client():
                 return ListRoomUsers(roomname)
             #usertyped "/msg messagebody"
             case "/msg":
-                message = entry.split(' ')[1]
+                message = ' '.join(entry.split(' ')[1:])
                 return MessageRoom(self.curRoom, message)
             #user typed "/msgroom #roomname : messageBody"
             case "/msgroom":
