@@ -216,6 +216,8 @@ def readInput(s:socket):
 if __name__ == '__main__':
     HOST, PORT = sys.argv[1], int(sys.argv[2])
     client = Client(HOST, PORT)
+    client.run()
+    """
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         s.connect((HOST, PORT))
 
@@ -226,3 +228,4 @@ if __name__ == '__main__':
             data = s.recv(1024)
             to_print = data.decode("utf-8")
             print(to_print)
+    """
