@@ -25,7 +25,7 @@ class Client():
     def getReply(self):
         while not self.G_quit:
             data = self.s.recv(1024)
-            return self.ParseServerMessage(data)            
+            return self.parseServerMessage(data.decode('utf-8'))            
     
     def parseUserCommand(self, entry:str) -> Message:
         cmd = entry.split(' ')[0]
@@ -41,7 +41,9 @@ class Client():
             #user typed "/join roomname"
             case "/join":
                 roomname = entry.split(' ')[1]
-                return JoinRoom(roomname)
+                print(f"found a join message, body: {roomname}")
+                print(f"message as string: {JoinRoom(roomname=roomname)}")
+                return JoinRoom(roomname=roomname)
             #user typed "/leave roomname"
             case "/leave":
                 roomname = entry.split(' ')[1]

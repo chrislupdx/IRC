@@ -40,6 +40,7 @@ class Server(object):
         if parsedType == self.cmds.MSGROOM:
             self.do_messageRoom(payload,fd)
         """
+        print(f"top of parseCmd, incoming_cmd: {incoming_cmd}")
         #incoming_cmd is string read in through socket
         userMessage = parseUserMessage(incoming_cmd)
         #userMessage is incoming_cmd parsed into a Messege for easy matching
@@ -49,25 +50,26 @@ class Server(object):
                 #do we need this case???
                 pass
             case ListRooms():
-                #send RoomList 
-                pass
+                self.do_listRooms(fd)
             case JoinRoom(roomname=roomname):
                 #add user to room
+                self.do_userJoinRoom(roomname, fd)
                 #send JoinRoomAck to user
-                pass
+                self.userList[fd].sock.send(bytes(str(JoinRoomAck(roomname)), 'utf-8'))
             case LeaveRoom(roomname=roomname):
                 #remove user from room
+                self.do_leaveRoom(roomname, fd)
                 #send LeaveRoomAck
-                pass
+                self.userList[fd].sock.send(bytes(str(LeaveRoomAck()), 'utf-8'))
             case ListRoomUsers(roomname=roomname):
                 #send RoomUsersList
-                pass
+                self.do_listRoomUsers
             case MessageRoom(roomname=roomname, messageBody=messageBody):
                 #send a RoomMessage to every user in every room
                 #roomName = payload.split()[0]
                 toSend = RoomMessage(roomname, messageBody)#" ".join(payload.split()[1:])
                 usersRoomList = self.roomList[roomname]
-                print(str(toSend))
+                #print(str(toSend))
                 self.do_sendToAllInList(toSend,fd,usersRoomList)
                 #send MessageAck 
                 self.userList[fd].sock.send(bytes(str(MessageAck())), 'utf-8')
@@ -76,10 +78,11 @@ class Server(object):
                 pass
             case Quit():
                 #remove user
+                self.do_quit(fd)
                 #send QuitAck
-                pass
-            
-   # def send_message(self, fd, message:Message):
+                self.userList[fd].sock.send(bytes(str(QuitAck()), 'utf-8'))
+            case _:
+                print(f"found bad message from {fd}: {userMessage}")
 
 
     def service_connection(self,key, mask):
@@ -161,17 +164,29 @@ class Server(object):
             sent = self.userList[fd].sock.send(messageToSend)
         return sent
 
-    def do_leave():
-        print("kicking you out of server")
+    def do_quit(self, fd):
+        print(f"kicking {fd} out of server")
+        for room in self.roomList:
+            if fd in room.userList: room.userList.remove(fd)
+        self.userList.remove(fd)
 
-    def do_listRooms():
-        print('listrooms called')
+    def do_listRooms(self, fd):
+        print(f'sent list of rooms to {fd}')
+        msg = RoomList([room.name for room in self.roomList])
+        self.userList[fd].sock.send(bytes(str(msg), 'utf-8'))
 
-    def do_leaveRoom(roomtoleave):
+    def do_leaveRoom(self, roomtoleave, fd):
         print("leavingRoom:", roomtoleave)
+        self.roomList[roomtoleave].remove(fd)
+    
+    def do_listRoomUsers(self, roomToList, fd):
+        print(f'sending list of users in {roomToList} to {fd}')
+        #should be nickname??
+        msg = RoomUsersList([str(user.fd) for user in self.roomList[roomToList]])
+        self.userList[fd].sock.send(bytes(str(msg), 'utf-8'))
 
-    def do_joinRoom(self, roomtoEnter):
-        print("inside join room", self.tmpID)
+    #def do_joinRoom(self, roomtoEnter):
+        #print("inside join room", self.tmpID)
 
 
 """    def listRooms(user):
