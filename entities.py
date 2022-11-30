@@ -32,8 +32,11 @@ class Server(object):
     def parseCmd(self, incoming_cmd:str, fd):
         #print(f"top of parseCmd, incoming_cmd: {incoming_cmd}")
         #incoming_cmd is string read in through socket
+        print("top of parse command")
+        print(incoming_cmd)
         userMessage = parseUserMessage(incoming_cmd)
         #userMessage is incoming_cmd parsed into a Messege for easy matching
+        print("user message: " + str(userMessage))
         match userMessage:
             case Connect(host=host, port=port):
                 #add user??
@@ -51,8 +54,8 @@ class Server(object):
                 self.do_listRoomUsers(roomname, fd)
             case MessageRoom( roomname=roomname, messageBody=messageBody):
                 #send a RoomMessage to every user in every room
-                toSend = RoomMessage(self.userList[fd].name, roomname, messageBody)
-                usersRoomList = self.roomList[roomname]
+                toSend = RoomMessage(self.userList[fd].nick, roomname, messageBody)
+                usersRoomList = self.roomList[roomname].userList
                 self.do_sendToAllInList(toSend,fd,usersRoomList)
             case UserCheckIn():
                 #update user time out
@@ -60,8 +63,6 @@ class Server(object):
             case Quit():
                 #remove user
                 self.do_quit(fd)
-                #send QuitAck
-                #self.userList[fd].sock.send(bytes(str(QuitAck()), 'utf-8'))
             case _:
                 print(f"found bad message from {fd}: {userMessage}")
 
