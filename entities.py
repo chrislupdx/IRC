@@ -40,6 +40,7 @@ class Server(object):
         if parsedType == self.cmds.MSGROOM:
             self.do_messageRoom(payload,fd)
         """
+        print(f"top of parseCmd, incoming_cmd: {incoming_cmd}")
         #incoming_cmd is string read in through socket
         userMessage = parseUserMessage(incoming_cmd)
         #userMessage is incoming_cmd parsed into a Messege for easy matching
@@ -54,7 +55,7 @@ class Server(object):
                 #add user to room
                 self.do_userJoinRoom(roomname, fd)
                 #send JoinRoomAck to user
-                self.userList[fd].sock.send(bytes(str(JoinRoomAck()), 'utf-8'))
+                self.userList[fd].sock.send(bytes(str(JoinRoomAck(roomname)), 'utf-8'))
             case LeaveRoom(roomname=roomname):
                 #remove user from room
                 self.do_leaveRoom(roomname, fd)
@@ -80,6 +81,8 @@ class Server(object):
                 self.do_quit(fd)
                 #send QuitAck
                 self.userList[fd].sock.send(bytes(str(QuitAck()), 'utf-8'))
+            case _:
+                print(f"found bad message from {fd}: {userMessage}")
 
 
     def service_connection(self,key, mask):
@@ -162,13 +165,13 @@ class Server(object):
         return sent
 
     def do_quit(self, fd):
-        print(f"kicking {} out of server", fd)
+        print(f"kicking {fd} out of server")
         for room in self.roomList:
             if fd in room.userList: room.userList.remove(fd)
         self.userList.remove(fd)
 
     def do_listRooms(self, fd):
-        print(f'sent list of rooms to {}', fd)
+        print(f'sent list of rooms to {fd}')
         msg = RoomList([room.name for room in self.roomList])
         self.userList[fd].sock.send(bytes(str(msg), 'utf-8'))
 
@@ -177,7 +180,7 @@ class Server(object):
         self.roomList[roomtoleave].remove(fd)
     
     def do_listRoomUsers(self, roomToList, fd):
-        print(f'sending list of users in {} to {}', roomToList, fd)
+        print(f'sending list of users in {roomToList} to {fd}')
         #should be nickname??
         msg = RoomUsersList([str(user.fd) for user in self.roomList[roomToList]])
         self.userList[fd].sock.send(bytes(str(msg), 'utf-8'))
