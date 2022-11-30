@@ -45,6 +45,13 @@ class MessageRoom(UserMessage):
         body = '#'+roomname+' : ' + messageBody
         super().__init__("MESSAGEROOM", body)
 
+class MessageUser(UserMessage):
+    def __init__(self, recip, messageBody):
+        self.recip = recip
+        self.messageBody = messageBody
+        body = recip + ' : ' + messageBody
+        super().__init__("USERMESSAGE", body)
+
 class UserCheckIn(UserMessage):
     def __init__(self):
         super().__init__("CHECKIN")

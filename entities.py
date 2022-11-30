@@ -30,13 +30,9 @@ class Server(object):
         self.tmpID +=1
 
     def parseCmd(self, incoming_cmd:str, fd):
-        #print(f"top of parseCmd, incoming_cmd: {incoming_cmd}")
         #incoming_cmd is string read in through socket
-        print("top of parse command")
-        print(incoming_cmd)
         userMessage = parseUserMessage(incoming_cmd)
         #userMessage is incoming_cmd parsed into a Messege for easy matching
-        print("user message: " + str(userMessage))
         match userMessage:
             case Connect(host=host, port=port):
                 #add user??
@@ -57,6 +53,10 @@ class Server(object):
                 toSend = RoomMessage(self.userList[fd].nick, roomname, messageBody)
                 usersRoomList = self.roomList[roomname].userList
                 self.do_sendToAllInList(toSend,fd,usersRoomList)
+            case MessageUser(recip=recip, messageBody=messageBody):
+                toSend = RoomMessage(self.userList[fd].nick, "private message", messageBody)
+                recipFD = [i for i in self.userList if self.userList[i].nick == recip][0]
+                self.userList[recipFD].sock.send(bytes(str(toSend), 'utf-8'))
             case UserCheckIn():
                 #update user time out
                 pass

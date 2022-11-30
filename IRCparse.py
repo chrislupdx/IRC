@@ -15,10 +15,11 @@ def parseUserMessage(unparsedMsg:str) -> Message:
 		case "MESSAGEROOM":
 			roomname = clean.split(' ')[1][1:]
 			messageBody = clean.split(':')[1].strip()
-			print("found MESSAGE from client")
-			print("roomname: " + roomname)
-			print("messageBody: " + messageBody)
 			return MessageRoom(roomname, messageBody)
+		case "USERMESSAGE":
+			recip = clean.split(' ')[1]
+			messageBody = clean.split(':')[1]
+			return MessageUser(recip, messageBody)
 		case "CHECKIN":
 			return UserCheckIn()
 		case "QUIT":

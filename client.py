@@ -79,6 +79,11 @@ class Client():
                 roomname = entry.split(' ')[1][1:] #get roomname without '#'
                 message = entry.split(':')[1].strip()
                 return MessageRoom(roomname, message)
+            #user typed "/dm recip : messagebody"
+            case "/dm":
+                recip = entry.split(' ')[1]
+                message = entry.split(':')[1]
+                return MessageUser(recip, message)
             case "/quit":
                 return Quit()
         
@@ -120,46 +125,43 @@ class Client():
     def readInput(self, s:socket):
         while not self.G_quit:
             usrMsg = input()
-            if usrMsg[0]!="/":
-                #catch invalid message early
-                print("invalid user command")
-                continue
-            else:
-                parsedCmd = self.parseUserCommand(usrMsg)
-                match parsedCmd:
-                    case Connect(host=host, port=port):
-                        pass
-                    case ListRooms():
-                        #send request to server
-                        s.sendall(bytes(str(parsedCmd), 'utf-8'))
-                    case JoinRoom(roomname=roomname):
-                        #send request to server
-                        s.sendall(bytes(str(parsedCmd), 'utf-8'))
-                        self.curRoom = roomname
-                        self.rooms += [roomname]
-                    case LeaveRoom(roomname=roomname):
-                        if roomname not in self.rooms:
-                            print("cannot leave room, not in room")
-                            continue
-                        #send request to server
-                        s.sendall(bytes(str(parsedCmd), 'utf-8'))
-                        #wait for server response
-                    case ListRoomUsers(roomname=roomname):
-                        #send request to server
-                        s.sendall(bytes(str(parsedCmd), 'utf-8'))
-                    case MessageRoom(roomname=roomname, messageBody=message):
-                        #send request to server
-                        s.sendall(bytes(str(parsedCmd), 'utf-8'))
-                    case Quit():
-                        #send request to server
-                        print("quitting....")
-                        s.sendall(bytes(str(parsedCmd), 'utf-8'))
-                        self.G_quit = True
-
-                    case _:
-                        #error in user command, send nothing, reprompt
-                        print("invalid user command")
+            parsedCmd = self.parseUserCommand(usrMsg)
+            match parsedCmd:
+                case Connect(host=host, port=port):
+                    pass
+                case ListRooms():
+                    #send request to server
+                    s.sendall(bytes(str(parsedCmd), 'utf-8'))
+                case JoinRoom(roomname=roomname):
+                    #send request to server
+                    s.sendall(bytes(str(parsedCmd), 'utf-8'))
+                    self.curRoom = roomname
+                    self.rooms += [roomname]
+                case LeaveRoom(roomname=roomname):
+                    if roomname not in self.rooms:
+                        print("cannot leave room, not in room")
                         continue
+                    #send request to server
+                    s.sendall(bytes(str(parsedCmd), 'utf-8'))
+                    #wait for server response
+                case ListRoomUsers(roomname=roomname):
+                    #send request to server
+                    s.sendall(bytes(str(parsedCmd), 'utf-8'))
+                case MessageRoom(roomname=roomname, messageBody=message):
+                    #send request to server
+                    s.sendall(bytes(str(parsedCmd), 'utf-8'))
+                case MessageUser(recip=recip, messageBody=messageBody):
+                    s.sendall(bytes(str(parsedCmd), 'utf-8'))
+                case Quit():
+                    #send request to server
+                    print("quitting....")
+                    s.sendall(bytes(str(parsedCmd), 'utf-8'))
+                    self.G_quit = True
+
+                case _:
+                    #error in user command, send nothing, reprompt
+                    print("invalid user command")
+                    continue
 
 if __name__ == '__main__':
     HOST, PORT = sys.argv[1], int(sys.argv[2])
