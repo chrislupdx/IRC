@@ -21,11 +21,10 @@ class Client():
         self.s.connect((HOST, PORT))
         t = Thread(group=None,target=client.readInput, name="ReadsFromStdin",args=[self.s])
         t.start()
-
-    def getReply(self):
         while not self.G_quit:
             data = self.s.recv(1024)
-            return self.parseServerMessage(data.decode('utf-8'))            
+            serverMsg = self.parseServerMessage(data.decode('utf-8'))
+            self.executeServerMessage(serverMsg)            
     
     def parseUserCommand(self, entry:str) -> Message:
         cmd = entry.split(' ')[0]
@@ -67,15 +66,16 @@ class Client():
     def parseServerMessage(self, serverMessage:str) -> Message:
         header = serverMessage.split(' ')[0]
         match header:
-            case "CONNECTACK":
-                return ConnectAck
+            # case "CONNECTACK":
+            #     return ConnectAck
             case "ROOMLIST":
                 roomlist = [room for room in serverMessage.split(' ')[1:]]
                 return RoomList(roomlist)
-            case "JOINROOMACK":
-                return JoinRoomAck()
-            case "LEAVEROOMACK":
-                return LeaveRoomAck()
+            # case "JOINROOMACK":
+            #     roomname = serverMessage.split(' ')[1]
+            #     return JoinRoomAck(roomname)
+            # case "LEAVEROOMACK":
+            #     return LeaveRoomAck()
             case "ROOMUSERLIST":
                 roomusers = [user for user in serverMessage.split(' ')[1:]]
                 return RoomUsersList(roomusers)
@@ -83,15 +83,31 @@ class Client():
                 roomname = serverMessage.split(' ')[1]
                 messageBody = serverMessage.split(':')[1].strip()
                 return RoomMessage(roomname, messageBody)
-            case "MESSAGEACK":
-                return MessageAck()
+            # case "MESSAGEACK":
+            #     return MessageAck()
             case "CHECKIN":
                 return ServerCheckin()
-            case "QUITACK":
-                return QuitAck()
+            # case "QUITACK":
+            #     return QuitAck()
             case _:
                 raise Exception("recieved invalid server message: " + serverMessage)
-    
+        
+    def executeServerMessage(self, serverMsg):
+        match serverMsg:
+            case RoomList(roomlist=roomlist):
+                print("Available Rooms: ")
+                for room in roomlist: print(room)
+            case RoomUsersList(roomlist=roomusers):
+                print("Users in room: ")
+                for user in roomusers: print(user)
+            case RoomMessage(roomname=roomname, messageBody=messageBody):
+                print(roomname+": ", end='')
+                print(messageBody)
+            case ServerCheckin():
+                pass
+            case _:
+                raise Exception("execute server message recieved invalid server message: " + str(serverMsg))
+
     def readInput(self, s:socket):
         while not self.G_quit:
             usrMsg = input()
@@ -110,26 +126,11 @@ class Client():
                     case ListRooms():
                         #send request to server
                         s.sendall(bytes(str(parsedCmd), 'utf-8'))
-                        #wait for server response
-                        reply = self.getReply()
-                        match reply:
-                            case RoomList(roomnames):
-                                #print all the roomnames
-                                for room in roomnames: print(room)
-                            case _:
-                                raise Exception("received invalid server reply to ListRooms: " + str(reply))
                     case JoinRoom(roomname=roomname):
                         #send request to server
                         s.sendall(bytes(str(parsedCmd), 'utf-8'))
-                        #wait for server ack
-                        reply = self.getReply()
-                        match reply:
-                            case JoinRoomAck():
-                                #add room to list of joined rooms
-                                self.rooms += [roomname]
-                                self.curRoom = roomname
-                            case _:
-                                raise Exception("recieved invalid server reply to ListRooms: " + str(reply))
+                        self.curRoom = roomname
+                        self.rooms += [roomname]
                     case LeaveRoom(roomname=roomname):
                         if roomname not in self.rooms:
                             print("cannot leave room, not in room")
@@ -137,18 +138,10 @@ class Client():
                         #send request to server
                         s.sendall(bytes(str(parsedCmd), 'utf-8'))
                         #wait for server response
-                        reply = self.getReply()
-                        match reply:
-                            case LeaveRoomAck():
-                                #remove room from list of joined rooms
-                                self.rooms.remove(roomname)
-                                if roomname == self.curRoom:
-                                    self.curRoom = ""
-                            case _:
-                                raise Exception("received invalid server reply to LeaveRoom: " + str(reply))                   
                     case ListRoomUsers(roomname=roomname):
                         #send request to server
                         s.sendall(bytes(str(parsedCmd), 'utf-8'))
+                        """
                         #wait for server response
                         reply = self.getReply()
                         match reply:
@@ -157,9 +150,11 @@ class Client():
                                 for user in roomusers: print(user)
                             case _:
                                 raise Exception("recieved invalid server reply to LeaveRoom: " + str(reply))
+                        """
                     case MessageRoom(roomname=roomname, messageBody=message):
                         #send request to server
                         s.sendall(bytes(str(parsedCmd), 'utf-8'))
+                        """
                         reply = self.getReply()
                         match reply:
                             case MessageAck():
@@ -167,6 +162,7 @@ class Client():
                                 continue
                             case _:
                                 raise Exception("received invalid server reply to MessageRoom: " + str(reply))
+                        """
                     case Quit():
                         #send request to server
                         s.sendall(bytes(str(parsedCmd), 'utf-8'))
