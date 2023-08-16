@@ -1,0 +1,19 @@
+we could make a generic type systemn for messages?
+
+add type hints, document the code better
+
+how are users structured?
+
+type hints in python yes
+
+tuple use?
+
+documetnation for the user
+
+documentaiton for the programmer
+
+what if the messages were verbs insted of nouns?
+
+entities.py's parsedCmd's class -> verb thing is a juncture we can change
+
+

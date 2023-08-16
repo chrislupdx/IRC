@@ -19,6 +19,24 @@ class Server(object):
         #self.cmds = IRCparse.IRCcommands()
 
     def accept_wrapper(self,sock):
+        """
+    Accepts a new client connection and sets up I/O for the client.
+
+    This method is responsible for accepting a new client connection and configuring
+    I/O for the connection. It registers the connection with the selector, sets it to
+    non-blocking mode, and creates a namespace to manage input and output data for
+    the connection. The method also adds the newly connected user to the server's
+    user list and assigns a temporary username from the `tmpListOfNames`.
+
+    Args:
+        sock (socket): The socket object representing the incoming connection.
+
+    Returns:
+        None
+
+    Usage:
+        self.accept_wrapper(socket_instance)
+    """
         conn, addr = sock.accept()  # Should be ready to read
         print(f"Accepted connection from {addr}")
         conn.setblocking(False)
@@ -30,6 +48,26 @@ class Server(object):
         self.tmpID +=1
 
     def parseCmd(self, incoming_cmd:str, fd):
+        """
+    Parses and processes an incoming command from a client.
+
+    This method takes an incoming command as a string read from a socket and
+    processes it based on the command's content. It converts the incoming command
+    into a Message object for easier matching and handles different types of
+    user commands, such as connecting to the server, listing rooms, joining/leaving
+    rooms, sending messages, and quitting.
+
+    Args:
+        //double check incoming is actually string 
+        incoming_cmd (str): The incoming command received from the client.
+        fd: The file descriptor associated with the client's socket.
+
+    Returns:
+        None
+
+    Usage:
+        self.parseCmd(incoming_command, file_descriptor)
+        """
         #incoming_cmd is string read in through socket
         userMessage = parseUserMessage(incoming_cmd)
         #userMessage is incoming_cmd parsed into a Messege for easy matching
@@ -68,6 +106,26 @@ class Server(object):
 
 
     def service_connection(self,key, mask):
+        """
+    Services a client connection based on the provided key and event mask.
+
+    This method is responsible for servicing a client connection based on the
+    provided selector key and the corresponding event mask. It handles both read
+    and write events for the client socket. If the event mask includes EVENT_READ,
+    the method attempts to receive data from the client socket and processes it.
+    If the event mask includes EVENT_WRITE, the method sends any pending data
+    and processes incoming commands.
+
+    Args:
+        key (selectors.SelectorKey): The selector key associated with the client socket.
+        mask (int): The event mask indicating the type of event (read/write).
+
+    Returns:
+        None
+
+    Usage:
+        self.service_connection(selector_key, event_mask)
+    """
         sock = key.fileobj
         data = key.data
         #global usrID #this is the second instatitaion of this globally, possibly dangerous?
@@ -89,6 +147,26 @@ class Server(object):
 
 
     def startServer(self, host, port): 
+        """
+    Starts the chat server and listens for incoming connections.
+
+    This method initializes the server, binds it to the specified host and port,
+    and begins listening for incoming connections. It utilizes the selectors module
+    to manage I/O events on multiple sockets, enabling efficient handling of multiple
+    client connections. The method enters a loop where it waits for and processes
+    events such as accepting new connections and servicing existing connections.
+    The server continues to run until a keyboard interrupt (Ctrl+C) is caught.
+
+    Args:
+        host (str): The host address on which the server will listen.
+        port (int): The port number on which the server will listen.
+
+    Returns:
+        None
+
+    Usage:
+        self.startServer(host, port)
+    """
         self.sel = selectors.DefaultSelector()
         lsock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         lsock.bind((host, port))

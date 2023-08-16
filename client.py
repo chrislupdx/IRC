@@ -11,6 +11,13 @@ HOST, PORT = sys.argv[1], int(sys.argv[2])
 class Client():
 
     def __init__(self, host, port):
+        """
+        Initializes a new Client instance.
+
+        Args:
+            host (str): The hostname or IP address of the chat server.
+            port (int): The port number to connect to on the chat server.
+        """
         self.host = host
         self.port = port
         self.curRoom = None
@@ -20,6 +27,25 @@ class Client():
         #self.s.setblocking(False)
     
     def readSocket(self, s:socket):
+        """
+    Reads data from a socket and processes server messages.
+
+    This method reads data from a socket and processes server messages
+    received from the chat server. It runs in a loop until the client
+    sets the `G_quit` flag to True.
+
+    Args:
+        s (socket): The socket object to read data from.
+
+    Returns:
+        None
+
+    Raises:
+        OSError: If there is an issue with the socket operation.
+
+    Usage:
+            client.readSocket(socket_instance)
+    """
         self.s.setblocking(0)
         while not self.G_quit:
             #data = self.s.recv(1024)
@@ -35,6 +61,21 @@ class Client():
                 self.executeServerMessage(serverMsg)   
 
     def run(self):
+        """
+        Connects to the chat server and starts the client's main loop.
+
+        This method establishes a connection to the chat server using the provided
+        host and port. It then spawns two threads: one for reading user input
+        from the standard input and another for reading server messages from
+        the socket. The client's main loop runs until the `G_quit` flag is set
+        to True, at which point the client terminates.
+
+        Returns:
+            None
+
+        Usage:
+            client.run()
+        """
         self.s.connect((self.host, self.port))
         #self.s.bind((self.host, self.port))
         #self.s.listen(1)
@@ -48,6 +89,23 @@ class Client():
         sys.exit()
     
     def parseUserCommand(self, entry:str) -> Message:
+        """
+    Parses a user's input entry and converts it into a corresponding Message object.
+
+    This method takes a user's input entry and processes it to create an appropriate
+    Message object that represents the user's command for the chat client. The method
+    recognizes various commands, such as connecting to a server, listing rooms,
+    joining/leaving rooms, sending messages to rooms or individual users, and quitting.
+
+    Args:
+        entry (str): The user's input command entry.
+
+    Returns:
+        Message: A Message object representing the parsed user command.
+
+    Usage:
+        command = client.parseUserCommand(input_entry)
+        """
         cmd = entry.split(' ')[0]
         match cmd:
             #user typed "/connect HOST PORT"
@@ -88,6 +146,23 @@ class Client():
                 return Quit()
         
     def parseServerMessage(self, serverMessage:str) -> Message:
+        """
+        Parses a server message and converts it into a corresponding Message object.
+
+        This method takes a server message received from the chat server and processes
+        it to create an appropriate Message object that represents the server's response
+        or broadcast. The method recognizes different types of server messages, such as
+        room lists, user lists, room messages, check-in notifications, and default messages.
+
+        Args:
+            serverMessage (str): The server message received from the chat server.
+
+        Returns:
+            Message: A Message object representing the parsed server message.
+
+        Usage:
+            message = client.parseServerMessage(server_response)
+        """
         header = serverMessage.split(' ')[0]
         match header:
             case "ROOMLIST":
@@ -107,6 +182,26 @@ class Client():
                 return RoomMessage("SERVER ", serverMessage)
         
     def executeServerMessage(self, serverMsg):
+        """
+    Executes actions based on the received server message.
+
+    This method takes a parsed server message and performs appropriate actions
+    based on the content of the message. It handles different types of server
+    messages, such as displaying room lists, showing room users, printing room messages,
+    and handling server check-ins.
+
+    Args:
+        serverMsg: A parsed server message as a Message object.
+
+    Returns:
+        None
+
+    Raises:
+        Exception: If an invalid server message is received.
+
+    Usage:
+        client.executeServerMessage(server_message)
+    """
         match serverMsg:
             case RoomList(roomlist=roomlist):
                 print("Available Rooms: ")
@@ -123,6 +218,24 @@ class Client():
                 raise Exception("execute server message recieved invalid server message: " + str(serverMsg))
 
     def readInput(self, s:socket):
+        """
+    Reads user input and processes user commands for the chat client.
+
+    This method continuously reads user input from the standard input and processes
+    the user's commands. It handles various user commands, such as connecting to
+    the server, listing rooms, joining/leaving rooms, sending messages, and quitting
+    the client. The method interacts with the chat server by sending appropriate
+    requests based on the parsed user commands.
+
+    Args:
+        s (socket): The socket object used for communication with the chat server.
+
+    Returns:
+        None
+
+    Usage:
+        client.readInput(socket_instance)
+    """
         while not self.G_quit:
             usrMsg = input()
             parsedCmd = self.parseUserCommand(usrMsg)

@@ -1,0 +1,21 @@
+unit tests 
+    client
+    entities
+    server
+    message
+    ircparse
+
+integration tests (between)
+    -connectvity
+    -user auth
+    -channel ops
+    -private messaging
+    -server commands
+    -handling user input
+    -graceful disconnected
+    -server response rate
+    -
+
+smoke tests
+    functional login
+    x
