@@ -79,7 +79,8 @@ class Server(object):
             case ListRooms():
                 self.do_listRooms(fd)
             case JoinRoom(roomname=roomname):
-                self.do_userJoinRoom(roomname, fd)
+                self.do_userJoinRoom(roomname, fd) 
+                # what if we returned the value of the thing
             case LeaveRoom(roomname=roomname):
                 #remove user from room
                 self.do_leaveRoom(roomname, fd)

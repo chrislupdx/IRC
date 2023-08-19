@@ -1,6 +1,11 @@
 from unittest.mock import MagicMock, call, PropertyMock
 from client import client
 
+def test_run(mocker):
+    pass
+    #run also doesn't return anything of signififcance
+
+
 def test_do_get(mocker):
     # Mocking the SFTPClient instance and the pysftp.Connection instance
     client_mock = SFTPClient()
@@ -37,14 +42,31 @@ def test_do_get(mocker):
 
 def test_readsocket(mocker):
     #what conditions would we want to test
-
     # mock the socket 
     self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-
     #create the client object
     testclient = Client()
-
+    #feed client a socket
     #produce the mocked result
-
-    assert test_client(self.s) = client
+    #wait readSocket woudle need to return something
+    assert test_client(self.s) == client
     
+
+#could do a suit eof these
+def test_parseusercommand(mocker):
+    #if you "/connect localhost 8080"
+    #you should expect a Connect(localhost 8080)
+    #there would be around 9 options you could take
+    pass
+
+def test_parseServerMessage(mocker):
+    pass
+    #there are four possible parameeters
+
+def test_executeServerMessage(mocker):
+    #has 4 params
+    pass
+
+def test_readInput(mocker):
+    #has 8 params
+    pass
