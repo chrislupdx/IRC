@@ -60,33 +60,63 @@ class Client():
                 serverMsg = self.parseServerMessage(data.decode('utf-8'))
                 self.executeServerMessage(serverMsg)   
 
+    # def run(self):
+    #     """
+    #     Connects to the chat server and starts the client's main loop.
+
+    #     This method establishes a connection to the chat server using the provided
+    #     host and port. It then spawns two threads: one for reading user input
+    #     from the standard input and another for reading server messages from
+    #     the socket. The client's main loop runs until the `G_quit` flag is set
+    #     to True, at which point the client terminates.
+
+    #     Returns:
+    #         None
+
+    #     Usage:
+    #         client.run()
+    #     """
+    #     self.s.connect((self.host, self.port))
+    #     #self.s.bind((self.host, self.port))
+    #     #self.s.listen(1)
+    #     #conn, addr = self.s.accept()
+    #     t = Thread(group=None,target=client.readInput, name="ReadsFromStdin",args=[self.s])
+    #     t.start()      
+    #     s = Thread(group=None,target=client.readSocket, name="ReadsFromSocket",args=[self.s])
+    #     s.start()
+    #     while not self.G_quit:
+    #         sleep(.1)
+    #     sys.exit()
+    
     def run(self):
-        """
-        Connects to the chat server and starts the client's main loop.
+            """
+            Connects to the chat server and starts the client's main loop.
 
-        This method establishes a connection to the chat server using the provided
-        host and port. It then spawns two threads: one for reading user input
-        from the standard input and another for reading server messages from
-        the socket. The client's main loop runs until the `G_quit` flag is set
-        to True, at which point the client terminates.
+            This method establishes a connection to the chat server using the provided
+            host and port. It then spawns two threads: one for reading user input
+            from the standard input and another for reading server messages from
+            the socket. The client's main loop runs until the `G_quit` flag is set
+            to True, at which point the client terminates.
 
-        Returns:
-            None
+            Returns:
+                int: Exit code (0 for successful execution, 1 for an error).
 
-        Usage:
-            client.run()
-        """
-        self.s.connect((self.host, self.port))
-        #self.s.bind((self.host, self.port))
-        #self.s.listen(1)
-        #conn, addr = self.s.accept()
-        t = Thread(group=None,target=client.readInput, name="ReadsFromStdin",args=[self.s])
-        t.start()      
-        s = Thread(group=None,target=client.readSocket, name="ReadsFromSocket",args=[self.s])
-        s.start()
-        while not self.G_quit:
-            sleep(.1)
-        sys.exit()
+            Usage:
+                exit_code = client.run()
+            """
+            try:
+                self.s.connect((self.host, self.port))
+                t = Thread(group=None, target=self.readInput, name="ReadsFromStdin", args=[self.s])
+                t.start()
+                s = Thread(group=None, target=self.readSocket, name="ReadsFromSocket", args=[self.s])
+                s.start()
+                while not self.G_quit:
+                    sleep(0.1)
+                return 0
+            except Exception as e:
+                print("An error occurred:", str(e))
+                return 1
+
     
     def parseUserCommand(self, entry:str) -> Message:
         """
