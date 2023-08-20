@@ -6,7 +6,8 @@ from threading import Thread
 from IRCparse import *
 import select
 
-HOST, PORT = sys.argv[1], int(sys.argv[2])
+# this needs to go somewhere else
+# HOST, PORT = sys.argv[1], int(sys.argv[2])
 
 class Client():
 
@@ -59,34 +60,6 @@ class Client():
                     return
                 serverMsg = self.parseServerMessage(data.decode('utf-8'))
                 self.executeServerMessage(serverMsg)   
-
-    # def run(self):
-    #     """
-    #     Connects to the chat server and starts the client's main loop.
-
-    #     This method establishes a connection to the chat server using the provided
-    #     host and port. It then spawns two threads: one for reading user input
-    #     from the standard input and another for reading server messages from
-    #     the socket. The client's main loop runs until the `G_quit` flag is set
-    #     to True, at which point the client terminates.
-
-    #     Returns:
-    #         None
-
-    #     Usage:
-    #         client.run()
-    #     """
-    #     self.s.connect((self.host, self.port))
-    #     #self.s.bind((self.host, self.port))
-    #     #self.s.listen(1)
-    #     #conn, addr = self.s.accept()
-    #     t = Thread(group=None,target=client.readInput, name="ReadsFromStdin",args=[self.s])
-    #     t.start()      
-    #     s = Thread(group=None,target=client.readSocket, name="ReadsFromSocket",args=[self.s])
-    #     s.start()
-    #     while not self.G_quit:
-    #         sleep(.1)
-    #     sys.exit()
     
     def run(self):
             """
@@ -247,64 +220,69 @@ class Client():
             case _:
                 raise Exception("execute server message recieved invalid server message: " + str(serverMsg))
 
-    def readInput(self, s:socket):
+def readInput(self, s:socket):
         """
-    Reads user input and processes user commands for the chat client.
+        Reads user input and processes user commands for the chat client.
 
-    This method continuously reads user input from the standard input and processes
-    the user's commands. It handles various user commands, such as connecting to
-    the server, listing rooms, joining/leaving rooms, sending messages, and quitting
-    the client. The method interacts with the chat server by sending appropriate
-    requests based on the parsed user commands.
+        This method continuously reads user input from the standard input and processes
+        the user's commands. It handles various user commands, such as connecting to
+        the server, listing rooms, joining/leaving rooms, sending messages, and quitting
+        the client. The method interacts with the chat server by sending appropriate
+        requests based on the parsed user commands.
 
-    Args:
-        s (socket): The socket object used for communication with the chat server.
+        Args:
+            s (socket): The socket object used for communication with the chat server.
 
-    Returns:
-        None
+        Returns:
+            None
 
-    Usage:
-        client.readInput(socket_instance)
-    """
-        while not self.G_quit:
-            usrMsg = input()
-            parsedCmd = self.parseUserCommand(usrMsg)
-            match parsedCmd:
-                case Connect(host=host, port=port):
-                    pass
-                case ListRooms():
-                    #send request to server
-                    s.sendall(bytes(str(parsedCmd), 'utf-8'))
-                case JoinRoom(roomname=roomname):
-                    #send request to server
-                    s.sendall(bytes(str(parsedCmd), 'utf-8'))
-                    self.curRoom = roomname
-                    self.rooms += [roomname]
-                case LeaveRoom(roomname=roomname):
-                    if roomname not in self.rooms:
-                        print("cannot leave room, not in room")
+        Usage:
+            client.readInput(socket_instance)
+        """
+        try:
+            while not self.G_quit:
+                usrMsg = input()
+                parsedCmd = self.parseUserCommand(usrMsg)
+                match parsedCmd:
+                    case Connect(host=host, port=port):
+                        pass
+                    case ListRooms():
+                        #send request to server
+                        s.sendall(bytes(str(parsedCmd), 'utf-8'))
+                    case JoinRoom(roomname=roomname):
+                        #send request to server
+                        s.sendall(bytes(str(parsedCmd), 'utf-8'))
+                        self.curRoom = roomname
+                        self.rooms += [roomname]
+                    case LeaveRoom(roomname=roomname):
+                        if roomname not in self.rooms:
+                            print("cannot leave room, not in room")
+                            continue
+                        #send request to server
+                        s.sendall(bytes(str(parsedCmd), 'utf-8'))
+                        #wait for server response
+                    case ListRoomUsers(roomname=roomname):
+                        #send request to server
+                        s.sendall(bytes(str(parsedCmd), 'utf-8'))
+                    case MessageRoom(roomname=roomname, messageBody=message):
+                        #send request to server
+                        s.sendall(bytes(str(parsedCmd), 'utf-8'))
+                    case MessageUser(recip=recip, messageBody=messageBody):
+                        s.sendall(bytes(str(parsedCmd), 'utf-8'))
+                    case Quit():
+                        #send request to server
+                        print("quitting....")
+                        s.sendall(bytes(str(parsedCmd), 'utf-8'))
+                        self.G_quit = True
+                        return 0
+                    case _:
+                        #error in user command, send nothing, reprompt
+                        print("invalid user command")
                         continue
-                    #send request to server
-                    s.sendall(bytes(str(parsedCmd), 'utf-8'))
-                    #wait for server response
-                case ListRoomUsers(roomname=roomname):
-                    #send request to server
-                    s.sendall(bytes(str(parsedCmd), 'utf-8'))
-                case MessageRoom(roomname=roomname, messageBody=message):
-                    #send request to server
-                    s.sendall(bytes(str(parsedCmd), 'utf-8'))
-                case MessageUser(recip=recip, messageBody=messageBody):
-                    s.sendall(bytes(str(parsedCmd), 'utf-8'))
-                case Quit():
-                    #send request to server
-                    print("quitting....")
-                    s.sendall(bytes(str(parsedCmd), 'utf-8'))
-                    self.G_quit = True
+        except Exception as e:
+            print("An error occurred:", str(e))
+            return 1
 
-                case _:
-                    #error in user command, send nothing, reprompt
-                    print("invalid user command")
-                    continue
 
 if __name__ == '__main__':
     HOST, PORT = sys.argv[1], int(sys.argv[2])

@@ -17,3 +17,4 @@ what if the messages were verbs insted of nouns?
 entities.py's parsedCmd's class -> verb thing is a juncture we can change
 
 8/18: basic problem: a lot of functions don't return anything 
+
