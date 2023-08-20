@@ -24,6 +24,8 @@ def test_run_pass(mocker):
     assert client_res == 1
 
 def test_run_socket_fail(mocker):
+    # simulates a socket failure
+
     #arrange
     host = "localhost"
     port = 8080
@@ -32,28 +34,33 @@ def test_run_socket_fail(mocker):
     mock_socket = MagicMock()
     mock_socket.socket = MagicMock(socket.socket)
     mock_socket.connect.side_effect = socket.error("Simulated error")
-    
     with patch("client.socket", new=mock_socket):
         client = Client(host, port)
 
         #act
+        # should have called socket 
         exit_code = client.run()
 
         #assert
         assert exit_code == 1
 
-def test_readsocket(mocker):
-    #what conditions would we want to test
-    # mock the socket 
-    # self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    # #create the client object
-    # testclient = Client()
-    # #feed client a socket
-    # #produce the mocked result
-    # #wait readSocket woudle need to return something
-    # assert test_client(self.s) == client
-    # return 0
-    pass
+# def test_readsocket_fail(mocker):
+#     #arrange
+#     host = "localhost"
+#     port = 8080
+#     mock_socket = MagicMock()
+#     mock_socket.socket = MagicMock(socket.socket)
+#     mock_socket.connect.side_effect = socket.error("Simulated error")
+
+#     with patch("client.socket", new=mock_socket):
+#         client = Client(host, port)
+
+#         #act
+#         exit_res = client.readSocket(mock_socket.socket())
+#         # exit_code = client.run()
+
+#         #assert
+#         assert exit_res == 1
 
 #could do a suit eof these
 def test_parseusercommand(mocker):
@@ -61,8 +68,6 @@ def test_parseusercommand(mocker):
     #you should expect a Connect(localhost 8080)
     #there would be around 9 options you could take
     pass
-
-
 
 def test_readInput(mocker):
     #has 8 params

@@ -36,3 +36,6 @@
 # Todo
 - Create usernames
 - 
+
+# Developer Tips
+- 
