@@ -13,7 +13,6 @@ class MockSocket:
 
 def test_run_pass(mocker):
     # arrange
-    # it doesn't like being handled this way
     client_mock = Client("localhost", 8080)
     t = MagicMock()
     t.start = MagicMock()
@@ -42,6 +41,28 @@ def test_run_socket_fail(mocker):
 
         #assert
         assert exit_code == 1
+
+def test_readsocket(mocker):
+    #what conditions would we want to test
+    # mock the socket 
+    # self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    # #create the client object
+    # testclient = Client()
+    # #feed client a socket
+    # #produce the mocked result
+    # #wait readSocket woudle need to return something
+    # assert test_client(self.s) == client
+    # return 0
+    pass
+
+#could do a suit eof these
+def test_parseusercommand(mocker):
+    #if you "/connect localhost 8080"
+    #you should expect a Connect(localhost 8080)
+    #there would be around 9 options you could take
+    pass
+
+
 
 def test_readInput(mocker):
     #has 8 params
@@ -82,25 +103,7 @@ def test_do_get(mocker):
     # readinput
     #
 
-def test_readsocket(mocker):
-    #what conditions would we want to test
-    # mock the socket 
-    # self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    # #create the client object
-    # testclient = Client()
-    # #feed client a socket
-    # #produce the mocked result
-    # #wait readSocket woudle need to return something
-    # assert test_client(self.s) == client
-    # return 0
-    pass
 
-#could do a suit eof these
-def test_parseusercommand(mocker):
-    #if you "/connect localhost 8080"
-    #you should expect a Connect(localhost 8080)
-    #there would be around 9 options you could take
-    pass
 
 def test_parseServerMessage(mocker):
     pass
